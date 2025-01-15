@@ -1,0 +1,29 @@
+Metadata-Version: 2.2
+Name: multitraitclustering
+Version: 0.1.1
+Summary: Applies clustering methods to GWAS data to identify separate pathway groups.
+Author: Hayley Wragg
+Author-email: your.email@example.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE.txt
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: requires-python
+Dynamic: summary
+
+
+Applies clustering methods to GWAS data to identify separate pathway groups. 
+The clustering methods handle association data across many phenotype traits. 
+The output will also return the pathway enrichment for the clusters.
+
+Input type: `filename.csv` should contain the association scores between SNPs 
+and phenotypes. Each row corresponds to a SNP and each column corresponds to 
+a trait. The first column is the SNP rsid labels. The first row is the trait 
+labels.

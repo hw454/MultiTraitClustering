@@ -1,0 +1,30 @@
+{
+    "cSpell.words": [
+        "clust",
+        "cnum",
+        "Dataframe",
+        "dsetup",
+        "forall",
+        "Hayley",
+        "initialisation",
+        "initialising",
+        "irnt",
+        "klab",
+        "Kmeans",
+        "multitraitclustering",
+        "nclust",
+        "normalisation",
+        "Normalise",
+        "normalised",
+        "pdist"
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./src",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.unittestEnabled": true
+}
