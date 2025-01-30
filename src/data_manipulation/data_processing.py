@@ -57,27 +57,32 @@ def centroid_distance(cents, data, membership,
         cluster labels in the membership.""".format(nclust = str(cents.shape[0]), 
                                                     clustlabs = str(membership.nunique()))
         raise ValueError(error_string)
+    if not all(m in cents.index for m in membership.unique()):
+        error_string = """There are clusters in the membership list {mems}, which 
+        do not have a corresponding centre in {cent_list}""".format(mems = str(membership.unique()), 
+                                                    cent_list = str(cents.index))
+        raise ValueError(error_string)
     distance_df = pd.DataFrame(index = membership.index, columns = ["clust_dist", "clust_num"])
     i = 0
     if metric == "euc":
         for snp, row in data.iterrows():
             #print(snp, membership.index, data.index, data.shape[0] != membership.shape[0])
             clust_num = membership[snp]
-            clust_cent = cents.iloc[clust_num, :]
+            clust_cent = cents.loc[clust_num, :]
             distance_df.loc[snp, "clust_dist"] = np.linalg.norm(clust_cent-row)
             distance_df.loc[snp, "clust_num"] = clust_num
             i += 1
     elif metric == "cosine-dist":
         for snp, row in data.iterrows():
             clust_num = membership[snp]
-            clust_cent = cents.iloc[clust_num]
+            clust_cent = cents.loc[clust_num, :]
             distance_df.loc[snp, "clust_dist"] = cosine(clust_cent,row)
             distance_df.loc[snp, "clust_num"] = clust_num
             i += 1
     elif metric == "cosine-sim":
         for snp, row in data.iterrows():
             clust_num = membership[snp]
-            clust_cent = cents.iloc[clust_num]
+            clust_cent = cents.loc[clust_num, :]
             distance_df.loc[snp, "clust_dist"] = cosine(clust_cent,row)-1
             distance_df.loc[snp, "clust_num"] = clust_num
             i += 1
