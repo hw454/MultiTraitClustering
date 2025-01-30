@@ -528,7 +528,109 @@ class TestClusteringMethods(unittest.TestCase):
                           dist_df = dist_df, 
                           res_df = res_df.iloc[0:-2,:])
         
-    #def test_kmeans_minibatch(self):
+    def test_kmeans_minibatch(self):
+        """ kmeans_minibatch should take in the exposure data, distance data and results data frame.
+        Then compute clusters using kmeans_minibatch and add them to the results dataframe.
+        Returns a dictionary containing the results dataframe and the method parameters."""
+        data = ds.load_association_data(path_dir = "../data/TestData/",
+                                        eff_fname = "unstdBeta_df.csv",
+                                        exp_fname = "Beta_EXP.csv")
+        dist_df= pd.DataFrame( data = ds.mat_dist(data["eff_df"]),
+                              index = data["eff_df"].index,
+                              columns = data["eff_df"].index)
+        res_df = data["exp_df"].merge(data["eff_df"], left_index= True, right_index = True,
+                   how='inner')
+        mini_out = meth.kmeans_minibatch(data["eff_df"], dist_df, res_df)
+        # Check that a dictionary is output
+        self.assertTrue(isinstance(mini_out, dict))
+        # Check that the dictionary contains results dataframe
+        self.assertTrue(isinstance(mini_out["results"], pd.DataFrame))
+        # Check that the dictionary contains the cluster parameter dictionary
+        self.assertTrue(isinstance(mini_out["cluster_dict"], dict))
+        # Test with cosine-metric
+        mini_euc = meth.kmeans_minibatch(data["eff_df"], dist_df, res_df, dist_met="Euclidean")
+        # Check that a dictionary is output
+        self.assertTrue(isinstance(mini_euc, dict))
+        # Check that the dictionary contains results dataframe
+        self.assertTrue(isinstance(mini_euc["results"], pd.DataFrame))
+        # Check that the dictionary contains the cluster parameter dictionary
+        self.assertTrue(isinstance(mini_euc["cluster_dict"], dict))
+        # NEGATIVE CHECKS
+        # TYPE CHECKS
+        # Check that TypeError is returned if exposure data is not entered as a dataframe
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"].to_numpy(),
+                          dist_df = dist_df, 
+                          res_df = res_df)
+        # Check that TypeError is returned if distance data is not entered as a dataframe
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df.to_numpy(), 
+                          res_df = res_df)
+        # Check that TypeError is returned if results data is not entered as a dataframe
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df.to_numpy())
+        # Check that TypeError is returned if nclust is not a string
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          nclust = 3.2)
+        # Check that TypeError is returned if rand_st is not a string
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          rand_st = "A")
+        # Check that TypeError is returned if n_in is not an integer
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          n_in = 3.2)
+        # Check that TypeError is returned if batch_size is not an integer
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          batch_size = 3.2)
+        # Check that TypeError is returned iter_max is not an integer
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          iter_max = 3.2)
+        # Check that TypeError is returned if dist_met is not a string
+        self.assertRaises(TypeError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          dist_met = 3.2)
+        # VALUE CHECKS
+        # Check that ValueError is returned if dist_met is not "Euclidean" or "CosineSimilarity"
+        self.assertRaises(ValueError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df,
+                          dist_met = "A")
+        # DIMENSION CHECKS
+        # Incorrect rows in data
+        self.assertRaises(ValueError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"].iloc[0:-2,:],
+                          dist_df = dist_df, 
+                          res_df = res_df)
+        # Mismatch rows and columns in dist_df
+        self.assertRaises(ValueError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df.iloc[0:-2,:], 
+                          res_df = res_df)
+        # Incorrect rows in result
+        self.assertRaises(ValueError, meth.kmeans_minibatch, 
+                          assoc_df = data["eff_df"],
+                          dist_df = dist_df, 
+                          res_df = res_df.iloc[0:-2,:])
     #def test_spectral(self):
         
 
