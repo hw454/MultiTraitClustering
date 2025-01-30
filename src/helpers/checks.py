@@ -1,3 +1,5 @@
+import pandas as pd
+
 def str_check(var, var_name):
     """Raise Type Error if var is not a string
     
