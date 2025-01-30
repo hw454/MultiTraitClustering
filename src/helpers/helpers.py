@@ -28,11 +28,19 @@ def num_to_word(num):
               18: ' eighteen', 19: 'nineteen', 20: 'twenty'}
     tens_dict = {20: 'twenty', 30: 'thirty', 40:'forty', 50:'fifty', 60:'sixty', 70:'seventy',
                  80: ' eighty', 90: 'ninety', 100:'OneHundred'}
-    if num > 20:
+    if num > 20 and num <= 100:
         digit = num%10
         w1 = n_dict[int(digit)].title()
         ten_mul = num - digit
         w2 = tens_dict[int(ten_mul)].title()
         word_num = w1+w2
+    elif num > 100:
+        unit = num%10
+        w1 = n_dict[int(unit)].title()
+        hundreds = num//100
+        w3 = n_dict[int(hundreds)].title()+"Hundred"
+        tens = num - hundreds*100 - unit
+        w2 = tens_dict[int(tens)].title()
+        word_num = w3+w2+w1
     else: word_num = n_dict[int(num)].title()
     return word_num
