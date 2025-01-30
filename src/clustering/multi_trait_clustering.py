@@ -311,6 +311,66 @@ def cluster_all_methods(exp_df, assoc_df):
     res_df = db_cos_05["results"]
     clust_dict[method_str] = db_cos_05["cluster_dict"]
 
+    # Cluster with GMM n_comps = 2
+    nc = 2
+    cov_type = "diag"
+    gmm_met = "CosineDistance"
+    method_str = method_string(meth_str, cov_type, gmm_met, nc)
+    gmm_cos_2 = methods.gmm(assoc_df, cos_dist, res_df,
+                               n_comps = nc, cov_type = cov_type, gmm_met = gmm_met)
+    res_df = gmm_cos_2["results"]
+    clust_dict[method_str] = gmm_cos_2["cluster_dict"]
+
+    # Cluster with GMM n_comps = 4
+    nc = 4
+    method_str = method_string(meth_str, cov_type, gmm_met, nc)
+    gmm_cos_2 = methods.gmm(assoc_df, cos_dist, res_df,
+                               n_comps = nc, cov_type = cov_type, gmm_met = gmm_met)
+    res_df = gmm_cos_2["results"]
+    clust_dict[method_str] = gmm_cos_2["cluster_dict"]
+
+    # Cluster with GMM n_comps = 6
+    nc = 6
+    method_str = method_string(meth_str, cov_type, gmm_met, nc)
+    gmm_cos_2 = methods.gmm(assoc_df, cos_dist, res_df,
+                               n_comps = nc, cov_type = cov_type, gmm_met = gmm_met)
+    res_df = gmm_cos_2["results"]
+    clust_dict[method_str] = gmm_cos_2["cluster_dict"]
+
+    # Cluster with birch thresh = 0.25
+    thresh = 0.25
+    branch_fac = 50
+    bir_met = "CosineDistance"
+    method_str = method_string(meth_str, "", bir_met, int(100*thresh))
+    bir_cos_025 = methods.birch(assoc_df, cos_dist, res_df,
+                              thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
+    res_df = bir_cos_025["results"]
+    clust_dict[method_str] = bir_cos_025["cluster_dict"]
+
+    # Cluster with birch thresh = 1.25
+    thresh = 1.25
+    branch_fac = 50
+    bir_met = "CosineDistance"
+    method_str = method_string(meth_str, "", bir_met, int(100*thresh))
+    bir_cos_125 = methods.birch(assoc_df, cos_dist, res_df,
+                              thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
+    res_df = bir_cos_125["results"]
+    clust_dict[method_str] = bir_cos_125["cluster_dict"]
+
+    # Cluster with birch thresh = 2.25
+    thresh = 2.25
+    branch_fac = 50
+    bir_met = "CosineDistance"
+    method_str = method_string(meth_str, "", bir_met, int(100*thresh))
+    bir_cos_225 = methods.birch(assoc_df, cos_dist, res_df,
+                              thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
+    res_df = bir_cos_225["results"]
+    clust_dict[method_str] = bir_cos_225["cluster_dict"]
+    
+    # Cluster with kmeans mini-batch
+
+    # Cluster with Spectral
+
     # Collect results
     out_dict = {"clust_pars_dict": clust_dict, "clust_results": res_df}
     return out_dict
