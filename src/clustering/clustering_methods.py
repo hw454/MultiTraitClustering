@@ -7,6 +7,7 @@ from sklearn.mixture import GaussianMixture
 from clustering import multi_trait_clustering as mtc
 from data_manipulation import data_processing as dp
 from helpers import checks as checks
+from helpers import helpers as hp
 
 def kmeans(assoc_df, dist_df, res_df,
                    nclust = 4, rand_st = 240, 
@@ -58,8 +59,11 @@ def kmeans(assoc_df, dist_df, res_df,
     # Raise TypeError if n_clust, rand_st, iter_max or n_in are not integers
     checks.int_check(nclust, "nclust")
     checks.int_check(rand_st, "rand_st")
-    checks.int_check(n_in, "n_in")
     checks.int_check(iter_max, "iter_max")
+    # Raise TyperError if n_in is not an integer or "auto"
+    if not isinstance(n_in, (int, str)):
+        error_string = """The input n_in should be an integer or string not """ + str(type(n_in))
+        raise TypeError(error_string)
     # Raise TypeError if init_km, kmeans_alg is not a string or an array
     if not isinstance(init_km, (str, np.ndarray)):
         error_string = """The input init_km should be a string not """ + str(type(init_km))
@@ -273,7 +277,7 @@ def dbscan(assoc_df, dist_df, res_df,
         dist_met (str, optional): Metric used for measuring distance between data-points, either ["Euclidean"(default), or "CosineSimilarity"].
 
     Raises:
-        TypeError: If iassoc_df is not a dataframe
+        TypeError: If assoc_df is not a dataframe
         TypeError: if dist_df is not a dataframe
         TypeError: if res_df is not a dataframe
         TypeError: if min_s is not an integer
@@ -622,23 +626,22 @@ def birch(assoc_df, dist_df, res_df,
 def kmeans_minibatch(assoc_df, dist_df, res_df,
                    nclust = 4, rand_st = 240, 
                    n_in = 50, batch_size = 30,
-                   iter_max = 300, init_km = "k-means++",
-                   kmeans_alg = "lloyd",
+                   iter_max = 300,
                    dist_met = "Euclidean"):
     """Kmeans Minibatch clustering
     
     Args:
-        assoc_df (pd.Dataframe): 
-        dist_df (pd.Dataframe):
-        res_df (pd.Dataframe):
-        nclust (int):
-        rand_st (int):
-        n_in (int):
-        batch_size (int):
-        iter_max (int):
-        init_km (str):
-        kmeans_alg (str):
-        dist_met (str):
+        assoc_df (pd.Dataframe): Dataframe for exposure data. rows are the snps, columns are the trait axes.
+        dist_df (pd.Dataframe): Dataframe with the distance between all points in assoc_df. 
+                                rows and columns are snps, values are the distances between the pairs.
+        res_df (pd.Dataframe): Dataframe with the clustering results. rows are snps, columns clustering methods
+        nclust (int): Number of clusters to be assigned. Defaults to 4
+        rand_st (int): Random seed. Defaults to 240
+        n_in (int): Number of random initialisations. Defaults to 50.
+        batch_size (int): Number of points in each batch. Defaults to 30
+        iter_max (int): Maximum number of iterations. Defaults to 300.
+        dist_met (str): Label for distance metric. Defaults to "Euclidean". 
+                        Must be either "Euclidean", or "CosineDistance"
     
     Raises:
         TypeError: If assoc_df is not a dataframe
@@ -647,7 +650,6 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
         TypeError: If nclust is not an integer
         TypeError: If batch_size is not an integer
         TypeError: If iter_max is not an integer
-        TypeError: If init_km is not a string
         TypeError: If dist_met is not a string
         ValueError: if dist_met is not one of "CosineSimilarity" or "Euclidean"
         ValueError: If the dataframes do not have compatible dimensions
@@ -693,7 +695,7 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
         raise ValueError(error_string)
     # ------------------
     # Run the Clustering
-    mini_lab = mtc.method_string("MiniBatchKmeans",kmeans_alg, dist_met, nclust)
+    mini_lab = mtc.method_string("MiniBatchKmeans", hp.num_to_word(batch_size), dist_met, nclust)
     if dist_met == euc_str:
         mini_clusts = MiniBatchKMeans(n_clusters = nclust,
                                random_state = rand_st,
@@ -701,7 +703,6 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
                                max_iter = iter_max,
                                n_init = n_in).fit(dist_df)
         res_df[mini_lab] = mini_clusts
-        birch_clust_opts = np.unique(res_df[mini_lab] )
         #------------------------
         # Calculate the centroids
         # -----------------------
@@ -720,7 +721,6 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
                                max_iter = iter_max,
                                n_init = n_in).fit(dist_df)
         res_df[mini_lab] = mini_clusts
-        birch_clust_opts = np.unique(res_df[mini_lab])
         #------------------------
         # Calculate the centroids
         # -----------------------
@@ -740,7 +740,7 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
     # -------------------------------
     # Store the clustering parameters
     cluster_dict = {
-        "nclust": len(birch_clust_opts),
+        "nclust": nclust,
         "rand_st": rand_st,
         "iter_max": iter_max,
         "batch_size": batch_size,
