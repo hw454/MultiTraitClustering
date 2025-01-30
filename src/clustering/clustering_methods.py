@@ -6,70 +6,7 @@ from sklearn.mixture import GaussianMixture
 
 from clustering import multi_trait_clustering as mtc
 from data_manipulation import data_processing as dp
-
-def str_check(var, var_name):
-    """Raise Type Error if var is not a string
-    
-    Args:
-        var: The variable to be checked
-        var_name: The name of the variable for the error string.
-
-    Return: None
-    """
-    
-    if not isinstance(var,str):
-        var_type = type(var)
-        error_string = """The input {name} should be a string not {var_type}""" .format(name = var_name, var_type = str(var_type))
-        raise TypeError(error_string)
-    return
-
-def int_check(var, var_name):
-    """Raise Type Error if var is not a int
-    
-    Args:
-        var: The variable to be checked
-        var_name: The name of the variable for the error string.
-
-    Return: None
-    """
-    
-    if not isinstance(var, int):
-        var_type = type(var)
-        error_string = """The input {name} should be a int not {var_type}""" .format(name = var_name, var_type = str(var_type))
-        raise TypeError(error_string)
-    return
-
-def float_check(var, var_name):
-    """Raise Type Error if var is not a float
-    
-    Args:
-        var: The variable to be checked
-        var_name: The name of the variable for the error string.
-
-    Return: None
-    """
-    
-    if not isinstance(var, float):
-        var_type = type(var)
-        error_string = """The input {name} should be a float not {var_type}""" .format(name = var_name, var_type = str(var_type))
-        raise TypeError(error_string)
-    return
-
-def df_check(var, var_name):
-    """Raise Type Error if var is not a Dataframe
-    
-    Args:
-        var: The variable to be checked
-        var_name: The name of the variable for the error string.
-
-    Return: None
-    """
-    
-    if not isinstance(var, pd.DataFrame):
-        var_type = type(var)
-        error_string = """The input {name} should be a dataframe not {var_type}""" .format(name = var_name, var_type = str(var_type))
-        raise TypeError(error_string)
-    return
+from helpers import checks as checks
 
 def kmeans(assoc_df, dist_df, res_df,
                    nclust = 4, rand_st = 240, 
@@ -115,20 +52,20 @@ def kmeans(assoc_df, dist_df, res_df,
     cos_str = "CosineSimilarity"
     # TYPE CHECKS
     # Raise TypeError if assoc_df, dist_df, or res_df are not Dataframes
-    df_check(assoc_df, "exposure data assoc_df")
-    df_check(dist_df, "distance data dist_df")
-    df_check(res_df, "results data res_df")
+    checks.df_check(assoc_df, "exposure data assoc_df")
+    checks.df_check(dist_df, "distance data dist_df")
+    checks.df_check(res_df, "results data res_df")
     # Raise TypeError if n_clust, rand_st, iter_max or n_in are not integers
-    int_check(nclust, "nclust")
-    int_check(rand_st, "rand_st")
-    int_check(n_in, "n_in")
-    int_check(iter_max, "iter_max")
+    checks.int_check(nclust, "nclust")
+    checks.int_check(rand_st, "rand_st")
+    checks.int_check(n_in, "n_in")
+    checks.int_check(iter_max, "iter_max")
     # Raise TypeError if init_km, kmeans_alg is not a string or an array
     if not isinstance(init_km, (str, np.ndarray)):
         error_string = """The input init_km should be a string not """ + str(type(init_km))
         raise TypeError(error_string)
     # Raise TypeError if kmeans_alg is not a string
-    str_check(kmeans_alg, "kmeans_alg")
+    checks.str_check(kmeans_alg, "kmeans_alg")
     # VALUE CHECKS
     # Raise ValueError if n_in is not an integer or "auto".
     if isinstance(n_in, str):
@@ -238,19 +175,19 @@ def kmedoids(assoc_df, dist_df, res_df,
     cos_str = "CosineSimilarity"
     # TYPE CHECKS
     # Raise TypeError if assoc_df, dist_df, or res_df are not Dataframes
-    df_check(assoc_df, "exposure data assoc_df")
-    df_check(dist_df, "distance data dist_df")
-    df_check(res_df, "results data res_df")
+    checks.df_check(assoc_df, "exposure data assoc_df")
+    checks.df_check(dist_df, "distance data dist_df")
+    checks.df_check(res_df, "results data res_df")
     # Raise TypeError if n_clust, rand_st, or iter_max are not integers
-    int_check(nclust, "nclust")
-    int_check(rand_st, "rand_st")
-    int_check(iter_max, "iter_max")
+    checks.int_check(nclust, "nclust")
+    checks.int_check(rand_st, "rand_st")
+    checks.int_check(iter_max, "iter_max")
     # Raise TypeError if init_km is not a string or an array
     if not isinstance(init_kmed, (str, np.ndarray)):
         error_string = """The input init_km should be a string not """ + str(type(init_kmed))
         raise TypeError(error_string)
     # Raise TypeError if kmedoids_alg is not a string
-    str_check(kmedoids_alg, "kmedoids_alg")
+    checks.str_check(kmedoids_alg, "kmedoids_alg")
     # VALUE CHECKS
     # Raise ValueError if init_km is not one of: `k-medoids++`, `random` or an array
     if isinstance(init_kmed, str):
@@ -355,15 +292,15 @@ def dbscan(assoc_df, dist_df, res_df,
     cos_str = "CosineSimilarity"
     # TYPE CHECKS
     # Raise TypeError if assoc_df, dist_df, or res_df are not Dataframes
-    df_check(assoc_df, "exposure data assoc_df")
-    df_check(dist_df, "distance data dist_df")
-    df_check(res_df, "results data res_df")
+    checks.df_check(assoc_df, "exposure data assoc_df")
+    checks.df_check(dist_df, "distance data dist_df")
+    checks.df_check(res_df, "results data res_df")
     # Raise TypeError if min_s is in an integer
-    int_check(min_s, "min_s")
+    checks.int_check(min_s, "min_s")
     # Raise TypeError if eps is not a float
-    float_check(eps, "eps")
+    checks.float_check(eps, "eps")
     # Raise TypeError if db_alg is not a string
-    str_check(db_alg, "db_alg")
+    checks.str_check(db_alg, "db_alg")
     # VALUE CHECKS
     # Raise ValueError if db_alg is not one of: "auto", "ball_tree", "kd_tree", "brute"
     if not db_alg in ["auto", "ball_tree", "kd_tree", "brute"]:
@@ -475,17 +412,17 @@ def gmm(assoc_df, dist_df, res_df,
     cos_str = "CosineDistance"
     # TYPE CHECKS
     # Raise TypeError if assoc_df, dist_df, or res_df are not Dataframes
-    df_check(assoc_df, "exposure data assoc_df")
-    df_check(dist_df, "distance data dist_df")
-    df_check(res_df, "results data res_df")
+    checks.df_check(assoc_df, "exposure data assoc_df")
+    checks.df_check(dist_df, "distance data dist_df")
+    checks.df_check(res_df, "results data res_df")
     # Raise TypeError is rand_st, max_iter are not an integers
-    int_check(n_comps, "n_comps")
-    int_check(rand_st, "rand_st")
-    int_check(max_iter, "max_iter")
+    checks.int_check(n_comps, "n_comps")
+    checks.int_check(rand_st, "rand_st")
+    checks.int_check(max_iter, "max_iter")
     # Raise TypeError if cov_type, in_pars, or gmm_met is not a string
-    str_check(cov_type, "cov_type")
-    str_check(in_pars, "in_pars")
-    str_check(gmm_met, "gmm_met")
+    checks.str_check(cov_type, "cov_type")
+    checks.str_check(in_pars, "in_pars")
+    checks.str_check(gmm_met, "gmm_met")
     # VALUE CHECKS
     # Raise ValueError if cov_type is not one of: "full", "tied", "diag", "spherical"
     if not cov_type in ["full", "tied", "diag", "spherical"]:
@@ -602,15 +539,15 @@ def birch(assoc_df, dist_df, res_df,
     cos_str = "CosineDistance"
     # TYPE CHECKS
     # Raise TypeError if assoc_df, dist_df, or res_df are not Dataframes
-    df_check(assoc_df, "exposure data assoc_df")
-    df_check(dist_df, "distance data dist_df")
-    df_check(res_df, "results data res_df")
+    checks.df_check(assoc_df, "exposure data assoc_df")
+    checks.df_check(dist_df, "distance data dist_df")
+    checks.df_check(res_df, "results data res_df")
     # Raise TypeError if thresh is a float
-    float_check(thresh, "thresh")
+    checks.float_check(thresh, "thresh")
     # Raise TypeError if branch_fac is not an integer
-    int_check(branch_fac, "branch_fac")
+    checks.int_check(branch_fac, "branch_fac")
     # Raise TypeError if bir_met is not a string
-    str_check(bir_met, "bir_met")
+    checks.str_check(bir_met, "bir_met")
     # VALUE CHECKS
     # Raise ValueError if dist_met is not one of "CosineSimilarity" or "Euclidean"
     if not bir_met in [euc_str, cos_str]:
@@ -725,16 +662,16 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
     cos_str = "CosineDistance"
     # TYPE CHECKS
     # Raise TypeError if assoc_df, dist_df, or res_df are not Dataframes
-    df_check(assoc_df, "exposure data assoc_df")
-    df_check(dist_df, "distance data dist_df")
-    df_check(res_df, "results data res_df")
+    checks.df_check(assoc_df, "exposure data assoc_df")
+    checks.df_check(dist_df, "distance data dist_df")
+    checks.df_check(res_df, "results data res_df")
     # Raise TypeError is batch_size, n_in, rand_st and iter_max are not integers
-    int_check(batch_size, "batch_size")
-    int_check(n_in, "n_in")
-    int_check(rand_st, "rand_st")
-    int_check(iter_max, "iter_max")
+    checks.int_check(batch_size, "batch_size")
+    checks.int_check(n_in, "n_in")
+    checks.int_check(rand_st, "rand_st")
+    checks.int_check(iter_max, "iter_max")
     # Raise TypeError if dist_met is not a string
-    str_check(dist_met, "dist_met")
+    checks.str_check(dist_met, "dist_met")
     # VALUE CHECKS
     # Raise ValueError if dist_met is not one of "CosineSimilarity" or "Euclidean"
     if not dist_met in [euc_str, cos_str]:
