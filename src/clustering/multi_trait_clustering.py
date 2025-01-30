@@ -367,9 +367,25 @@ def cluster_all_methods(exp_df, assoc_df):
     res_df = bir_cos_225["results"]
     clust_dict[method_str] = bir_cos_225["cluster_dict"]
     
-    # Cluster with kmeans mini-batch
-
-    # Cluster with Spectral
+    # Cluster with kmeans mini-batch n= 4
+    nclust = 4
+    batch_size = 30
+    dist_met = "CosineDistance"
+    method_str = method_string(meth_str, helpers.num_to_word(batch_size), dist_met, nclust)
+    mini_4 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
+                           batch_size = batch_size, dist_met = dist_met)
+    res_df = mini_4["results"]
+    clust_dict[method_str] = mini_4["cluster_dict"]
+    
+    # Cluster with kmeans mini-batch n=6
+    nclust = 6
+    batch_size = 30
+    dist_met = "CosineDistance"
+    method_str = method_string(meth_str, helpers.num_to_word(batch_size), dist_met, nclust)
+    mini_6 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
+                           batch_size = batch_size, dist_met = dist_met)
+    res_df = mini_6["results"]
+    clust_dict[method_str] = mini_6["cluster_dict"]
 
     # Collect results
     out_dict = {"clust_pars_dict": clust_dict, "clust_results": res_df}
