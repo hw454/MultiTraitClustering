@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 
-from helpers import checks as ch
+import checks as ch
 
 class TestMultiTraitClustering(unittest.TestCase):
 

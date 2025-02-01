@@ -3,7 +3,7 @@ import pandas as pd
 import random as rnd
 import numpy as np
 
-import data_manipulation.data_setup as dm
+import data_setup as dm
 
 class TestDataSetup(unittest.TestCase):
 

@@ -1,10 +1,9 @@
 import unittest
 import pandas as pd
 import random as rnd
-import numpy as np
 
-import data_manipulation.data_setup as ds
-import data_manipulation.data_processing as dp
+from multitraitclustering import data_setup as ds
+from multitraitclustering import data_processing as dp
 
 class TestDataProcessing(unittest.TestCase):
 
@@ -12,7 +11,7 @@ class TestDataProcessing(unittest.TestCase):
         """Test the data types and non-zero dimensions from loading the association data.
         """
         # Create dummy data for testing
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                                 eff_fname = "unstdBeta_df.csv",
                                                 exp_fname = "Beta_EXP.csv")
         npoints, ntraits = data["eff_df"].shape
@@ -90,7 +89,7 @@ class TestDataProcessing(unittest.TestCase):
     def test_calc_medoids(self):
         """ Check the compute_pca creates a Dataframe"""
         # Create dummy data for testing
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                                 eff_fname = "unstdBeta_df.csv",
                                                 exp_fname = "Beta_EXP.csv")
         npoints, _ = data["eff_df"].shape
@@ -134,7 +133,7 @@ class TestDataProcessing(unittest.TestCase):
         """The overlap score takes a dataframe of comparison values and evaluates an overall score.
         
         Check the input is a dataframe and output is a float. """
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                                 eff_fname = "unstdBeta_df.csv",
                                                 exp_fname = "Beta_EXP.csv")
         ndata = data["eff_df"].shape[0]
@@ -157,7 +156,7 @@ class TestDataProcessing(unittest.TestCase):
     def test_overlap_pairs(self):
         """Overlap_pairs takes the input of percentage overlap between clusters for two different methods.
         Then returns the pairs which best match each other."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                                 eff_fname = "unstdBeta_df.csv",
                                                 exp_fname = "Beta_EXP.csv")
         ndata = data["eff_df"].shape[0]
@@ -198,7 +197,7 @@ class TestDataProcessing(unittest.TestCase):
         of points in an overlap between clusters and compute this 
         as a percentage of the number in the clusters overall 
         (the intersection divided by the union)."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                                 eff_fname = "unstdBeta_df.csv",
                                                 exp_fname = "Beta_EXP.csv")
         ndata = data["eff_df"].shape[0]
@@ -222,7 +221,7 @@ class TestDataProcessing(unittest.TestCase):
         """The function calc_medoids should take in the dataframe for the full data and the
         distances between points, and the cluster membership. It should locate the median datapoint
         for each cluster and output as a dataframe."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                                 eff_fname = "unstdBeta_df.csv",
                                                 exp_fname = "Beta_EXP.csv")
         npoints, _ = data["eff_df"].shape

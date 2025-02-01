@@ -1,19 +1,15 @@
 import unittest
 import pandas as pd
-import random as rnd
-import numpy as np
 
-import data_manipulation.data_setup as ds
-import data_manipulation.data_processing as dp
-import clustering.multi_trait_clustering as mtc
-import clustering.clustering_methods as meth
+from multitraitclustering import data_setup as ds
+from multitraitclustering import clustering_methods as meth
 
 class TestClusteringMethods(unittest.TestCase):
     def test_kmeans(self):
         """ Kmeans should take in the exposure data, distance data and results data frame.
         Then compute clusters using Kmeans and add them to the results dataframe.
         Returns a dictionary containing the results dataframe and the method parameters."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                         eff_fname = "unstdBeta_df.csv",
                                         exp_fname = "Beta_EXP.csv")
         dist_df= pd.DataFrame( data = ds.mat_dist(data["eff_df"]),
@@ -134,7 +130,7 @@ class TestClusteringMethods(unittest.TestCase):
         """ Kmedoids should take in the exposure data, distance data and results data frame.
         Then compute clusters using Kmedoids and add them to the results dataframe.
         Returns a dictionary containing the results dataframe and the method parameters."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                         eff_fname = "unstdBeta_df.csv",
                                         exp_fname = "Beta_EXP.csv")
         
@@ -244,7 +240,7 @@ class TestClusteringMethods(unittest.TestCase):
         """ DBSCAN should take in the exposure data, distance data and results data frame.
         Then compute clusters using DBSCAN and add them to the results dataframe.
         Returns a dictionary containing the results dataframe and the method parameters."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                         eff_fname = "unstdBeta_df.csv",
                                         exp_fname = "Beta_EXP.csv")
         
@@ -342,7 +338,7 @@ class TestClusteringMethods(unittest.TestCase):
         """ GMM should take in the exposure data, distance data and results data frame.
         Then compute clusters using GMM (Gaussian Mixture Model) and add them to the results dataframe.
         Returns a dictionary containing the results dataframe and the method parameters."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                         eff_fname = "unstdBeta_df.csv",
                                         exp_fname = "Beta_EXP.csv")
         
@@ -446,7 +442,7 @@ class TestClusteringMethods(unittest.TestCase):
         """ Birch should take in the exposure data, distance data and results data frame.
         Then compute clusters using Birch and add them to the results dataframe.
         Returns a dictionary containing the results dataframe and the method parameters."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                         eff_fname = "unstdBeta_df.csv",
                                         exp_fname = "Beta_EXP.csv")
         dist_df= pd.DataFrame( data = ds.mat_dist(data["eff_df"]),
@@ -532,7 +528,7 @@ class TestClusteringMethods(unittest.TestCase):
         """ kmeans_minibatch should take in the exposure data, distance data and results data frame.
         Then compute clusters using kmeans_minibatch and add them to the results dataframe.
         Returns a dictionary containing the results dataframe and the method parameters."""
-        data = ds.load_association_data(path_dir = "../data/TestData/",
+        data = ds.load_association_data(path_dir = "./data/TestData/",
                                         eff_fname = "unstdBeta_df.csv",
                                         exp_fname = "Beta_EXP.csv")
         dist_df= pd.DataFrame( data = ds.mat_dist(data["eff_df"]),

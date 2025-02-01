@@ -3,8 +3,8 @@ import pandas as pd
 import random as rnd
 import numpy as np
 
-import data_manipulation.data_setup as ds
-import data_manipulation.data_processing as dp
+import data_setup as ds
+import data_processing as dp
 
 class TestDataProcessing(unittest.TestCase):
 

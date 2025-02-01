@@ -1,4 +1,5 @@
-from helpers import checks as ch
+from multitraitclustering import checks as ch
+
 def format_strings(test_str):
     """Replace digits with words and remove punctuation and spaces
 

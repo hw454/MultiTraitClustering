@@ -3,9 +3,8 @@ import pandas as pd
 import random as rnd
 import numpy as np
 
-import data_manipulation.data_setup as dm
-import data_manipulation.data_processing as dp
-import clustering.multi_trait_clustering as mtc
+import data_setup as dm
+import multi_trait_clustering as mtc
 
 class TestMultiTraitClustering(unittest.TestCase):
 

@@ -165,14 +165,14 @@ def load_association_data(path_dir, eff_fname = "/transformed_eff_dfs.csv",
         values and the standard errors.
     """
     # Check all files exist
-    if not os.path.exists(os.path.join( path_dir)):
-        error_string = "Requested directory " + path_dir + " does not exist at "+ os.getcwd()
+    if not os.path.exists(path_dir):
+        error_string = "Requested directory " + path_dir + " does not exist."
         raise ValueError(error_string)
-    if not os.path.exists(os.path.join(path_dir, eff_fname)):
-        error_string = "Requested file " + eff_fname + " does not exist at "+ os.getcwd() + path_dir
+    if not os.path.exists(path_dir + eff_fname):
+        error_string = "Requested file " + eff_fname + " does not exist at " + path_dir
         raise ValueError(error_string)
-    if not os.path.exists(os.path.join(path_dir, exp_fname)):
-        error_string = "Requested file " + exp_fname + " does not exist at "+ os.getcwd() + path_dir
+    if not os.path.exists(path_dir + exp_fname):
+        error_string = "Requested file " + exp_fname + " does not exist at " + path_dir
         raise ValueError(error_string)
     
     eff_df = pd.read_csv(path_dir + eff_fname, index_col=0)
