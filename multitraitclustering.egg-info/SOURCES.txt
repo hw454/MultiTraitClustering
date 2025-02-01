@@ -15,10 +15,10 @@ multitraitclustering.egg-info/PKG-INFO
 multitraitclustering.egg-info/SOURCES.txt
 multitraitclustering.egg-info/dependency_links.txt
 multitraitclustering.egg-info/top_level.txt
-multitraitclustering/test/__init__.py
-multitraitclustering/test/test_checks.py
-multitraitclustering/test/test_clustering_methods.py
-multitraitclustering/test/test_data_processing.py
-multitraitclustering/test/test_data_setup.py
-multitraitclustering/test/test_helpers.py
-multitraitclustering/test/test_multitrait_clustering.py
+test/__init__.py
+test/test_checks.py
+test/test_clustering_methods.py
+test/test_data_processing.py
+test/test_data_setup.py
+test/test_helpers.py
+test/test_multitrait_clustering.py

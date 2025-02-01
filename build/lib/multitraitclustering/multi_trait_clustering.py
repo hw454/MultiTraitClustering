@@ -4,9 +4,9 @@ import pandas as pd
 import numpy as np
 
 # Import local
-import helpers
-import data_setup as dsetup
-import clustering_methods as methods
+from multitraitclustering import helpers
+from multitraitclustering  import data_setup as dsetup
+from multitraitclustering import clustering_methods as methods
 
 #import snps as snps
 
