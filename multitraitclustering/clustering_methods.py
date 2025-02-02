@@ -337,6 +337,7 @@ def dbscan(assoc_df, dist_df, res_df,
                       metric = "euclidean",
                       algorithm= db_alg).fit(dist_df.to_numpy())
         nclust = len(np.unique(n_dbscan.labels_))
+        
         klab = mtc.method_string("DBSCAN%d"%(eps * 100), db_alg, dist_met, min_s)
         res_df[klab] = n_dbscan.labels_
         # Centroid distances

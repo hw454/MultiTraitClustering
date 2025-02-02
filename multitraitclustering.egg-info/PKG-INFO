@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: multitraitclustering
-Version: 0.1.13
+Version: 0.1.14
 Summary: Applies clustering methods to GWAS data to identify separate pathway groups.
 Author: Hayley Wragg
 Author-email: hayleywragg@hotmail.com

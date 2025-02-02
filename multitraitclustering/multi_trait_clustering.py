@@ -318,6 +318,7 @@ def cluster_all_methods(exp_df, assoc_df):
     nc = 2
     cov_type = "diag"
     gmm_met = "CosineDistance"
+    meth_str = "GMM"
     method_str = method_string(meth_str, cov_type, gmm_met, nc)
     gmm_cos_2 = methods.gmm(assoc_df, cos_dist, res_df,
                                n_comps = nc, cov_type = cov_type, gmm_met = gmm_met)
@@ -344,6 +345,7 @@ def cluster_all_methods(exp_df, assoc_df):
     thresh = 0.25
     branch_fac = 50
     bir_met = "CosineDistance"
+    meth_str = "Birch"
     method_str = method_string(meth_str, "", bir_met, int(100*thresh))
     bir_cos_025 = methods.birch(assoc_df, cos_dist, res_df,
                               thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
@@ -374,6 +376,7 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 4
     batch_size = 30
     dist_met = "CosineDistance"
+    meth_str = "MiniBatchKmeans"
     method_str = method_string(meth_str, hp.num_to_word(batch_size), dist_met, nclust)
     mini_4 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
                            batch_size = batch_size, dist_met = dist_met)

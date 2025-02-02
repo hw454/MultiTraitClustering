@@ -137,6 +137,7 @@ def kmeans(assoc_df, dist_df, res_df,
     km_aic = mtc.get_aic(dist_df, dimension)
     km_bic = mtc.get_bic(dist_df, dimension=dimension)
     cluster_dict = {
+      "alg_name": "K-means",
       "nclust": nclust,
       "rand_st": rand_st,
       "n_in": n_in,
@@ -254,6 +255,7 @@ def kmedoids(assoc_df, dist_df, res_df,
     kmed_aic = mtc.get_aic(dist_df, dimension)
     kmed_bic = mtc.get_bic(dist_df, dimension=dimension)
     cluster_dict = {
+      "alg_name": "K-medoids",
       "nclust": nclust,
       "rand_st": rand_st,
       "iter_max": iter_max,
@@ -367,6 +369,7 @@ def dbscan(assoc_df, dist_df, res_df,
     db_bic = mtc.get_bic(dist_df, dimension = dimension)
 
     cluster_dict = {
+        "alg_name": "DBSCAN",
         "nclust": nclust,
         "eps": eps,
         "min_samples": min_s,
@@ -499,6 +502,7 @@ def gmm(assoc_df, dist_df, res_df,
     gmm_aic = mtc.get_aic(dist_df, dimension = dimension)
     gmm_bic = mtc.get_bic(dist_df, n_params = n_params, dimension = dimension)
     cluster_dict = {
+      "alg_name": "Gaussian Mixture Model",
       "nclust": res_df[gmm_lab].nunique(),
       "RandSt": rand_st,
       "NComponents":n_comps,
@@ -614,6 +618,7 @@ def birch(assoc_df, dist_df, res_df,
     # -------------------------------
     # Store the clustering parameters
     cluster_dict = {
+        "alg_name": "Birch",
         "nclust": len(birch_clust_opts),
         "threshold": thresh,
         "BranchingFactor": branch_fac,
@@ -740,6 +745,7 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
     # -------------------------------
     # Store the clustering parameters
     cluster_dict = {
+        "alg_name": "K-means mini-batch",
         "nclust": nclust,
         "rand_st": rand_st,
         "iter_max": iter_max,

@@ -176,7 +176,7 @@ def cluster_all_methods(exp_df, assoc_df):
                    how='inner')
 
     # Compute cosine-similarity
-    beta_mat = exp_df.to_numpy()
+    beta_mat = res_df.to_numpy()
     cos_sims = cosine_similarity(beta_mat)
     cos_dist = pd.DataFrame(
                   index = assoc_df.index,
@@ -184,7 +184,7 @@ def cluster_all_methods(exp_df, assoc_df):
                   columns = assoc_df.index)
     euc_dist = pd.DataFrame(
                   index = assoc_df.index,
-                  data = dsetup.mat_dist(exp_df),
+                  data = dsetup.mat_dist(res_df),
                   columns = assoc_df.index)
 
     clust_dict = {}
@@ -391,6 +391,8 @@ def cluster_all_methods(exp_df, assoc_df):
     clust_dict[method_str] = mini_6["cluster_dict"]
 
     # Collect results
-    out_dict = {"clust_pars_dict": clust_dict, "clust_results": res_df}
+    clust_res_df = res_df.loc[:,res_df.columns.difference(assoc_df.columns)]
+    clust_res_df = clust_res_df.loc[:,clust_res_df.columns.difference(exp_df.columns)]
+    out_dict = {"clust_pars_dict": clust_dict, "clust_results": clust_res_df}
     return out_dict
 
