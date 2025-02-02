@@ -11,7 +11,7 @@ labels."""
 
 setup(
 name='multitraitclustering',
-version='0.1.9',
+version='0.1.14',
 author='Hayley Wragg',
 author_email='hayleywragg@hotmail.com',
 description="Applies clustering methods to GWAS data to identify separate pathway groups.",
