@@ -1,5 +1,5 @@
 import unittest
-from multitraitclustering import helpers as hp
+from multitraitclustering import string_funcs as hp
 
 class TestMultiTraitClustering(unittest.TestCase):
 

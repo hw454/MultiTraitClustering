@@ -7,7 +7,7 @@ from sklearn.mixture import GaussianMixture
 from multitraitclustering  import multi_trait_clustering as mtc
 from multitraitclustering import data_processing as dp
 from multitraitclustering import checks as checks
-from multitraitclustering import helpers as hp
+from multitraitclustering import string_funcs as hp
 
 def kmeans(assoc_df, dist_df, res_df,
                    nclust = 4, rand_st = 240, 

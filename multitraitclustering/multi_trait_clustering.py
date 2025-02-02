@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 # Import local
-from multitraitclustering import helpers
+from multitraitclustering import string_funcs as hp
 from multitraitclustering  import data_setup as dsetup
 from multitraitclustering import clustering_methods as methods
 
@@ -26,7 +26,7 @@ def method_string(meth_str, alg_str, dist_str, num):
     if not isinstance(num, (int, float)):
        error_string = "num should be a number not " + str(type(num))
        raise TypeError(error_string)
-    return meth_str.title() + alg_str.title() + dist_str.title() + helpers.num_to_word(num)
+    return meth_str.title() + alg_str.title() + dist_str.title() + hp.num_to_word(num)
 
 def get_aic (clust_mem_dist, dimension=2):
   """ Calculate the Akaike Information Criterion (AIC)
@@ -158,6 +158,8 @@ def cluster_all_methods(exp_df, assoc_df):
         assoc_df (pd.Dataframe): Association score with associated traits. Normalised.
 
     Returns:
+        out_dict (dict): {"clust_pars_dict": dictionary of cluster parameters- keys matching cluster label.,
+                      "clust_results": Dataframe with rows corresponding to snps and columns to the cluster methods.}
     """
     if not isinstance(exp_df, pd.DataFrame):
       error_string = "Expected dataframe for the exposure scores but got " + str(type(exp_df))
@@ -174,7 +176,7 @@ def cluster_all_methods(exp_df, assoc_df):
                    how='inner')
 
     # Compute cosine-similarity
-    beta_mat = exp_df.to_numpy()
+    beta_mat = res_df.to_numpy()
     cos_sims = cosine_similarity(beta_mat)
     cos_dist = pd.DataFrame(
                   index = assoc_df.index,
@@ -182,7 +184,7 @@ def cluster_all_methods(exp_df, assoc_df):
                   columns = assoc_df.index)
     euc_dist = pd.DataFrame(
                   index = assoc_df.index,
-                  data = dsetup.mat_dist(exp_df),
+                  data = dsetup.mat_dist(res_df),
                   columns = assoc_df.index)
 
     clust_dict = {}
@@ -201,7 +203,8 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 6
     method_str = method_string(meth_str, kmeans_alg, dist_met, nclust)
     km_lloyd_euc_6 = methods.kmeans(assoc_df, euc_dist, res_df,
-                                    nclust = nclust, kmeans_alg = kmeans_alg, dist_met = dist_met)
+                                    nclust = nclust, kmeans_alg = kmeans_alg,
+                                    dist_met = dist_met)
     res_df = km_lloyd_euc_6["results"]
     clust_dict[method_str] = km_lloyd_euc_6["cluster_dict"]
 
@@ -371,7 +374,7 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 4
     batch_size = 30
     dist_met = "CosineDistance"
-    method_str = method_string(meth_str, helpers.num_to_word(batch_size), dist_met, nclust)
+    method_str = method_string(meth_str, hp.num_to_word(batch_size), dist_met, nclust)
     mini_4 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
                            batch_size = batch_size, dist_met = dist_met)
     res_df = mini_4["results"]
@@ -381,13 +384,15 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 6
     batch_size = 30
     dist_met = "CosineDistance"
-    method_str = method_string(meth_str, helpers.num_to_word(batch_size), dist_met, nclust)
+    method_str = method_string(meth_str, hp.num_to_word(batch_size), dist_met, nclust)
     mini_6 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
                            batch_size = batch_size, dist_met = dist_met)
     res_df = mini_6["results"]
     clust_dict[method_str] = mini_6["cluster_dict"]
 
     # Collect results
-    out_dict = {"clust_pars_dict": clust_dict, "clust_results": res_df}
+    clust_res_df = res_df.loc[:,res_df.columns.difference(assoc_df.columns)]
+    clust_res_df = clust_res_df.loc[:,clust_res_df.columns.difference(exp_df.columns)]
+    out_dict = {"clust_pars_dict": clust_dict, "clust_results": clust_res_df}
     return out_dict
 
