@@ -145,7 +145,8 @@ def kmeans(assoc_df, dist_df, res_df,
       "init": init_km,
       "alg": kmeans_alg,
       "aic": km_aic,
-      "bic": km_bic}
+      "bic": km_bic,
+      "metric": dist_met}
 
     return({"results": res_df, "cluster_dict": cluster_dict})
 
@@ -224,7 +225,7 @@ def kmedoids(assoc_df, dist_df, res_df,
         raise ValueError(error_string)
     
     # Run the Clustering
-    klab = mtc.method_string('Kmedoids', "", dist_met, nclust)
+    klab = mtc.method_string('Kmedoids', kmedoids_alg, dist_met, nclust)
     if dist_met == euc_str:
         n_kmedoids = KMedoids(n_clusters=nclust,
                         metric = "euclidean",
@@ -262,7 +263,8 @@ def kmedoids(assoc_df, dist_df, res_df,
       "init": init_kmed,
       "alg": kmedoids_alg,
       "aic": kmed_aic,
-      "bic": kmed_bic}
+      "bic": kmed_bic,
+      "metric": dist_met}
 
     return({"results": res_df, "cluster_dict": cluster_dict})
 def dbscan(assoc_df, dist_df, res_df,
@@ -337,6 +339,7 @@ def dbscan(assoc_df, dist_df, res_df,
                       metric = "euclidean",
                       algorithm= db_alg).fit(dist_df.to_numpy())
         nclust = len(np.unique(n_dbscan.labels_))
+        
         klab = mtc.method_string("DBSCAN%d"%(eps * 100), db_alg, dist_met, min_s)
         res_df[klab] = n_dbscan.labels_
         # Centroid distances
@@ -577,7 +580,7 @@ def birch(assoc_df, dist_df, res_df,
         raise ValueError(error_string)
     # ------------------
     # Run the Clustering
-    birlab = mtc.method_string("Birch","", bir_met, branch_fac)
+    birlab = mtc.method_string("Birch"+"%d"%(100*thresh),"", bir_met, branch_fac)
     if bir_met == euc_str:
         brc = Birch(n_clusters=None, threshold=thresh, branching_factor = branch_fac).fit(dist_df)
         brc_clusts = brc.predict(dist_df)
@@ -700,14 +703,14 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
         raise ValueError(error_string)
     # ------------------
     # Run the Clustering
-    mini_lab = mtc.method_string("MiniBatchKmeans", hp.num_to_word(batch_size), dist_met, nclust)
+    mini_lab = mtc.method_string("MiniBatchKmeans"+"%d"%(batch_size),"", dist_met, nclust)
     if dist_met == euc_str:
         mini_clusts = MiniBatchKMeans(n_clusters = nclust,
                                random_state = rand_st,
                                batch_size = batch_size,
                                max_iter = iter_max,
                                n_init = n_in).fit(dist_df)
-        res_df[mini_lab] = mini_clusts
+        res_df[mini_lab] = mini_clusts.labels_
         #------------------------
         # Calculate the centroids
         # -----------------------
@@ -725,7 +728,7 @@ def kmeans_minibatch(assoc_df, dist_df, res_df,
                                batch_size = batch_size,
                                max_iter = iter_max,
                                n_init = n_in).fit(dist_df)
-        res_df[mini_lab] = mini_clusts
+        res_df[mini_lab] = mini_clusts.labels_
         #------------------------
         # Calculate the centroids
         # -----------------------

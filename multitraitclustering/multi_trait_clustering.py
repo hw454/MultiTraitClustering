@@ -228,6 +228,7 @@ def cluster_all_methods(exp_df, assoc_df):
    # Cluster with Kmedoids - Euclidean - 4 clusters.
     nclust = 4
     kmedoids_alg = "alternate"
+    meth_str = "Kmedoids"
     method_str = method_string(meth_str, kmedoids_alg, dist_met, nclust)
     kmed_euc_4 = methods.kmedoids(assoc_df, cos_dist, res_df,
                                     nclust = nclust, kmedoids_alg = kmedoids_alg, dist_met = dist_met)
@@ -246,6 +247,7 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 4
     dist_met = "CosineSimilarity"
     kmeans_alg = "lloyd"
+    meth_str = "Kmeans"
     method_str = method_string(meth_str, kmeans_alg, dist_met, nclust)
     km_cos_4 = methods.kmeans(assoc_df, cos_dist, res_df,
                               nclust = nclust, kmeans_alg = kmeans_alg, dist_met = dist_met)
@@ -266,6 +268,8 @@ def cluster_all_methods(exp_df, assoc_df):
     # Cluster with Kmedoids - CosineSimilarity - 4 clusters.
     nclust = 4
     dist_met = "CosineSimilarity"
+    kmedoids_alg = "alternate"
+    meth_str = "Kmedoids"
     method_str = method_string(meth_str, kmedoids_alg, dist_met, nclust)
     kmed_cos_4 = methods.kmedoids(assoc_df, cos_dist, res_df,
                                  nclust = nclust, kmedoids_alg = kmedoids_alg, dist_met = dist_met)
@@ -346,7 +350,7 @@ def cluster_all_methods(exp_df, assoc_df):
     branch_fac = 50
     bir_met = "CosineDistance"
     meth_str = "Birch"
-    method_str = method_string(meth_str, "", bir_met, int(100*thresh))
+    method_str = method_string(meth_str+"%d"%(100*thresh), "", bir_met, branch_fac)
     bir_cos_025 = methods.birch(assoc_df, cos_dist, res_df,
                               thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
     res_df = bir_cos_025["results"]
@@ -356,7 +360,7 @@ def cluster_all_methods(exp_df, assoc_df):
     thresh = 1.25
     branch_fac = 50
     bir_met = "CosineDistance"
-    method_str = method_string(meth_str, "", bir_met, int(100*thresh))
+    method_str = method_string(meth_str+"%d"%(100*thresh), "", bir_met, branch_fac)
     bir_cos_125 = methods.birch(assoc_df, cos_dist, res_df,
                               thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
     res_df = bir_cos_125["results"]
@@ -366,7 +370,7 @@ def cluster_all_methods(exp_df, assoc_df):
     thresh = 2.25
     branch_fac = 50
     bir_met = "CosineDistance"
-    method_str = method_string(meth_str, "", bir_met, int(100*thresh))
+    method_str = method_string(meth_str+"%d"%(100*thresh), "", bir_met, branch_fac)
     bir_cos_225 = methods.birch(assoc_df, cos_dist, res_df,
                               thresh = thresh, branch_fac = branch_fac, bir_met = bir_met)
     res_df = bir_cos_225["results"]
@@ -377,9 +381,9 @@ def cluster_all_methods(exp_df, assoc_df):
     batch_size = 30
     dist_met = "CosineDistance"
     meth_str = "MiniBatchKmeans"
-    method_str = method_string(meth_str, hp.num_to_word(batch_size), dist_met, nclust)
+    method_str = method_string(meth_str+"%d"%(batch_size),"", dist_met, nclust)
     mini_4 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
-                           batch_size = batch_size, dist_met = dist_met)
+                           nclust = nclust, batch_size = batch_size, dist_met = dist_met)
     res_df = mini_4["results"]
     clust_dict[method_str] = mini_4["cluster_dict"]
     
@@ -387,15 +391,24 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 6
     batch_size = 30
     dist_met = "CosineDistance"
-    method_str = method_string(meth_str, hp.num_to_word(batch_size), dist_met, nclust)
+    method_str = method_string(meth_str+"%d"%(batch_size),"", dist_met, nclust)
     mini_6 = methods.kmeans_minibatch(assoc_df, cos_dist, res_df,
-                           batch_size = batch_size, dist_met = dist_met)
+                           nclust = nclust, batch_size = batch_size, dist_met = dist_met)
     res_df = mini_6["results"]
     clust_dict[method_str] = mini_6["cluster_dict"]
 
     # Collect results
     clust_res_df = res_df.loc[:,res_df.columns.difference(assoc_df.columns)]
     clust_res_df = clust_res_df.loc[:,clust_res_df.columns.difference(exp_df.columns)]
+
+    # Check that the results have matching labels
+    if not set(clust_dict.keys()) == set(clust_res_df.columns):
+       error_string = """The keys between the clustering method parameter labels and the 
+       clustering results do not match. Parameter keys not in cluster results: {diffA}, 
+       and Results labels not in parameter keys: {diffB}""".format(diffA = set(clust_dict.keys().difference(clust_res_df.columns),
+                                                                               diffB = set(clust_res_df.columns).difference(set(clust_dict.keys()))))
+       raise ValueError(error_string)
+    
     out_dict = {"clust_pars_dict": clust_dict, "clust_results": clust_res_df}
     return out_dict
 

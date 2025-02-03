@@ -141,6 +141,8 @@ class TestMultiTraitClustering(unittest.TestCase):
         self.assertTrue(isinstance(clust_outs, dict))
         self.assertTrue(isinstance(clust_outs["clust_pars_dict"], dict))
         self.assertTrue(isinstance(clust_outs["clust_results"], pd.DataFrame))
+        # Check the keys for the clust_pars_dict match the columns for clust_df
+        self.assertTrue(set(clust_outs["clust_pars_dict"].keys()) == set(clust_outs["clust_results"].columns))
         # Check TypeErrors raised when input is not dataframe
         self.assertRaises(TypeError, mtc.cluster_all_methods, 
                           exp_df = data["exp_df"].to_numpy(), assoc_df = dummy_assoc_df)
