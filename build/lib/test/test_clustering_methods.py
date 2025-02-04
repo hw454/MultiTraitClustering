@@ -355,7 +355,7 @@ class TestClusteringMethods(unittest.TestCase):
         # Check that the dictionary contains the cluster parameter dictionary
         self.assertTrue(isinstance(gmm_out["cluster_dict"], dict))
         # Test with Euclidean-metric
-        gmm_euc = meth.gmm(data["eff_df"], dist_df, res_df, gmm_met="Euclidean")
+        gmm_euc = meth.gmm(data["eff_df"], dist_df, res_df, dist_met="Euclidean")
         # Check that a dictionary is output
         self.assertTrue(isinstance(gmm_euc, dict))
         # Check that the dictionary contains results dataframe
@@ -421,7 +421,7 @@ class TestClusteringMethods(unittest.TestCase):
                           assoc_df = data["eff_df"],
                           dist_df = dist_df, 
                           res_df = res_df,
-                          gmm_met = "A")
+                          dist_met = "A")
         # DIMENSION CHECKS
         # Incorrect rows in data
         self.assertRaises(ValueError, meth.gmm, 
@@ -458,7 +458,7 @@ class TestClusteringMethods(unittest.TestCase):
         # Check that the dictionary contains the cluster parameter dictionary
         self.assertTrue(isinstance(birch_out["cluster_dict"], dict))
         # Test with cosine-metric
-        birch_euc = meth.birch(data["eff_df"], dist_df, res_df, bir_met="Euclidean")
+        birch_euc = meth.birch(data["eff_df"], dist_df, res_df, dist_met="Euclidean")
         # Check that a dictionary is output
         self.assertTrue(isinstance(birch_euc, dict))
         # Check that the dictionary contains results dataframe
@@ -499,14 +499,14 @@ class TestClusteringMethods(unittest.TestCase):
                           assoc_df = data["eff_df"],
                           dist_df = dist_df, 
                           res_df = res_df,
-                          bir_met = 3)
+                          dist_met = 3)
         # VALUE CHECKS
         # Check that ValueError is returned if dist_met is not "Euclidean" or "CosineSimilarity"
         self.assertRaises(ValueError, meth.birch, 
                           assoc_df = data["eff_df"],
                           dist_df = dist_df, 
                           res_df = res_df,
-                          bir_met = "A")
+                          dist_met = "A")
         # DIMENSION CHECKS
         # Incorrect rows in data
         self.assertRaises(ValueError, meth.birch, 
