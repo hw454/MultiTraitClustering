@@ -31,5 +31,7 @@
     "python.testing.unittestEnabled": true,
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"
-      }    
+    },
+    "autoDocstring.includeExtendedSummary": true,
+    "autoDocstring.docstringFormat": "sphinx"
 }
