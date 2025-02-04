@@ -37,7 +37,7 @@ def compare_results_list_to_external(clust_df, external_df, external_lab):
 
     """
     # Validate the inputs
-    # Types
+    # TypeErrors
     if not isinstance(clust_df, pd.DataFrame):
         error_string = "Input clust_df should be a Dataframe not "\
             + str(type(clust_df))
@@ -46,11 +46,11 @@ def compare_results_list_to_external(clust_df, external_df, external_lab):
         error_string = "Input external_df should be a Dataframe not "\
               + str(type(external_df))
         raise TypeError(error_string)
-    if not isinstance(external_lab, [str, int, float]):
+    if not isinstance(external_lab, (str, int, float)):
         error_string = "Input external should be a string not "\
             + str(type(external_lab))
         raise TypeError(error_string)
-    # Values
+    # ValueErrors
     if external_lab not in external_df.columns:
         error_string = """Input external_lab {lab} should be a column in
         external_df. Options: {col_list}""".format(

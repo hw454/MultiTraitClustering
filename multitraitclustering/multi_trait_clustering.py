@@ -454,10 +454,10 @@ def cluster_all_methods(exp_df, assoc_df):
     # Cluster with birch thresh = 0.25
     thresh = 0.25
     branch_fac = 50
-    bir_met = "CosineDistance"
+    dist_met = "CosineDistance"
     meth_str = "Birch"
     method_str = method_string(
-        meth_str + "%d" % (100 * thresh), "", bir_met, branch_fac
+        meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
     )
     bir_cos_025 = methods.birch(
         assoc_df,
@@ -465,7 +465,7 @@ def cluster_all_methods(exp_df, assoc_df):
         res_df,
         thresh=thresh,
         branch_fac=branch_fac,
-        bir_met=bir_met,
+        dist_met=dist_met,
     )
     res_df = bir_cos_025["results"]
     clust_dict[method_str] = bir_cos_025["cluster_dict"]
@@ -473,9 +473,9 @@ def cluster_all_methods(exp_df, assoc_df):
     # Cluster with birch thresh = 1.25
     thresh = 1.25
     branch_fac = 50
-    bir_met = "CosineDistance"
+    dist_met = "CosineDistance"
     method_str = method_string(
-        meth_str + "%d" % (100 * thresh), "", bir_met, branch_fac
+        meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
     )
     bir_cos_125 = methods.birch(
         assoc_df,
@@ -483,7 +483,7 @@ def cluster_all_methods(exp_df, assoc_df):
         res_df,
         thresh=thresh,
         branch_fac=branch_fac,
-        bir_met=bir_met,
+        dist_met=dist_met,
     )
     res_df = bir_cos_125["results"]
     clust_dict[method_str] = bir_cos_125["cluster_dict"]
@@ -493,7 +493,7 @@ def cluster_all_methods(exp_df, assoc_df):
     branch_fac = 50
     bir_met = "CosineDistance"
     method_str = method_string(
-        meth_str + "%d" % (100 * thresh), "", bir_met, branch_fac
+        meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
     )
     bir_cos_225 = methods.birch(
         assoc_df,
@@ -501,7 +501,7 @@ def cluster_all_methods(exp_df, assoc_df):
         res_df,
         thresh=thresh,
         branch_fac=branch_fac,
-        bir_met=bir_met,
+        dist_met=dist_met,
     )
     res_df = bir_cos_225["results"]
     clust_dict[method_str] = bir_cos_225["cluster_dict"]
@@ -547,7 +547,7 @@ def cluster_all_methods(exp_df, assoc_df):
     clust_res_df = clust_res_df.loc[:, diff_cols]
 
     # Differing keys
-    diff_a = set(clust_dict.keys().difference(clust_res_df.columns))
+    diff_a = set(clust_dict.keys()).difference(set(clust_res_df.columns))
     diff_b = set(clust_res_df.columns).difference(set(clust_dict.keys()))
     # Check that the results have matching labels
     if not set(clust_dict.keys()) == set(clust_res_df.columns):

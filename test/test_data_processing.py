@@ -23,7 +23,9 @@ class TestDataProcessing(unittest.TestCase):
         mems_2 = [rnd.randint(1, nclusts + 3) for j in range(1, npnts + 1)]
         mems_3 = [rnd.randint(0, nclusts + 50) for j in range(1, npnts + 1)]
         external_df = pd.DataFrame(
-            index=data["eff_df"].index, data=membership, columns=external_lab
+            index=data["eff_df"].index, 
+            data=membership, 
+            columns=[external_lab]
         )
         clust_df = pd.DataFrame(
             index=data["eff_df"].index,
@@ -37,14 +39,14 @@ class TestDataProcessing(unittest.TestCase):
         # Check the dictionary items are the right type
         self.assertTrue(isinstance(compare_results["comp_dfs"], dict))
         self.assertTrue(isinstance(compare_results["cluster_matchings"], dict))
-        self.assertTrue(isinstance(compare_results["overlap_score"], dict))
+        self.assertTrue(isinstance(compare_results["overlap_scores"], dict))
         # Check the first time in each dictionary is the right type
         comp_key0 = list(compare_results["comp_dfs"].keys())[0]
         comp_df0 = compare_results["comp_dfs"][comp_key0]
         clust_match_key0 = list(compare_results["comp_dfs"].keys())[0]
         clust_match0 = compare_results["cluster_matchings"][clust_match_key0]
-        overlap_key0 = list(compare_results["overlap_score"].keys())[0]
-        overlap0 = compare_results["overlap_score"][overlap_key0]
+        overlap_key0 = list(compare_results["overlap_scores"].keys())[0]
+        overlap0 = compare_results["overlap_scores"][overlap_key0]
 
         self.assertTrue(isinstance(comp_df0, pd.DataFrame))
         self.assertTrue(isinstance(clust_match0, pd.DataFrame))
