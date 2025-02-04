@@ -53,8 +53,9 @@ def compare_df1_to_df2(clust_df1, clust_df2, lab1, lab2):
     cnum2 = clust_df2[lab2].unique()
     # Create a mapping between the cluster names and the position in the array.
     # Since some clusters are named "Null" or "Junk" the number can not always be used
-    cnum1_pos = {cn: idx for idx, cn in enumerate(cnum1)}
-    cnum2_pos = {cn: idx for idx, cn in enumerate(cnum2)}
+    # The labels for the clusters are converted to strings to account for NaN and None clusters.
+    cnum1_pos = {str(cn): idx for idx, cn in enumerate(cnum1)}
+    cnum2_pos = {str(cn): idx for idx, cn in enumerate(cnum2)}
     # Initialise the results array
     res_arr = np.zeros((len(cnum1), len(cnum2)))
     snp_list = clust_df1.index
@@ -63,8 +64,8 @@ def compare_df1_to_df2(clust_df1, clust_df2, lab1, lab2):
         cn1 = clust_df1[lab1].loc[snp]
         cn2 = clust_df2[lab2].loc[snp]
         # Get the position in the array for the cluster
-        i = cnum1_pos[cn1]
-        j = cnum2_pos[cn2]
+        i = cnum1_pos[str(cn1)]
+        j = cnum2_pos[str(cn2)]
         # Increase the count for the intersection of cn1 and cn2 each time a snp is present
         res_arr[i,j] += 1
     return res_arr

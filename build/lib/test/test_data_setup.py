@@ -139,6 +139,38 @@ class TestDataSetup(unittest.TestCase):
         self.assertRaises(TypeError, ds.compare_df1_to_df2, 
                           clust_df1 = df1, clust_df2 = df2, 
                           lab1 = 3, lab2 = 5)
+        # Check that the function still works with string labels for clusters
+        rand_nums1 = [rnd.randint(0, cnums) for i in range(0, ndata)]
+        clust_labs1 = list(map(chr, rand_nums1))
+        rand_nums2 = [rnd.randint(0, 10 * cnums) for i in range(0, ndata)]
+        lab1 = "clust1"
+        lab2 = "clust2"
+        df1 = pd.DataFrame(index = data["eff_df"].index,
+                                    data = {lab1: clust_labs1})
+        df2 = pd.DataFrame(index = data["eff_df"].index,
+                                    data = {lab2: rand_nums2})
+        comp_strs = ds.compare_df1_to_df2(clust_df1 = df1, clust_df2 = df2, lab1 = lab1, lab2 = lab2)
+        # Check output is an array
+        self.assertTrue(isinstance(comp_strs, np.ndarray))
+        # Check that the function works if one of the cluster methods is labelled with NaN
+        clust_labs1[0] = np.nan
+        df1 = pd.DataFrame(index = data["eff_df"].index,
+                                    data = {lab1: clust_labs1})
+        df2 = pd.DataFrame(index = data["eff_df"].index,
+                                    data = {lab2: rand_nums2})
+        comp_nans = ds.compare_df1_to_df2(clust_df1 = df1, clust_df2 = df2, lab1 = lab1, lab2 = lab2)
+        # Check output is an array
+        self.assertTrue(isinstance(comp_nans, np.ndarray))
+        # Check the case where the dataframes contains multiple clustering results
+        df1 = pd.DataFrame(index = data["eff_df"].index,
+                                data = {lab1: clust_labs1,
+                                        lab2: rand_nums2,
+                                        "Another": rand_nums1})
+        df2 = pd.DataFrame(index = data["eff_df"].index,
+                                    data = {lab2: rand_nums2})
+        comp_multi = ds.compare_df1_to_df2(clust_df1 = df1, clust_df2 = df2, lab1 = lab1, lab2 = lab2)
+        # Check output is an array
+        self.assertTrue(isinstance(comp_multi, np.ndarray))
         # Check that ValueError is raised if the label doesn't match a column name
         self.assertRaises(ValueError, ds.compare_df1_to_df2, 
                           clust_df1 = df1, clust_df2 = df2, lab1 = "no_match", lab2 = lab2)
