@@ -7,8 +7,9 @@ from multitraitclustering import string_funcs as hp
 from multitraitclustering import data_setup as dsetup
 from multitraitclustering import clustering_methods as methods
 
-# import snps as snps
-
+# TODO #4 create a function which loads the data and runs the clustering methods in one call
+# TODO #3 create scatter plots in clustering function
+# TODO #2 save results and plots from clustering
 
 def method_string(meth_str, alg_str, dist_str, num):
     """Create a string describing the clustering method and it's parameters.
