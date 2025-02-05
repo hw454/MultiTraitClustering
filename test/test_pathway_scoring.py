@@ -4,9 +4,10 @@ Description: TestPathwayScoring unit tests for the functions in the pathway_scor
 Type: UnitTests
 Created: 5th February 2025
 """
+
 import unittest
-import numpy as np
 import random
+import numpy as np
 import pandas as pd
 
 from multitraitclustering import pathway_scoring as ps
@@ -45,15 +46,14 @@ class TestPathwayScoring(unittest.TestCase):
         """
         test_uniqueness uniqueness estimate how close to unique columns/rows the data in df is.
         """
-        np = 300
+        npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(np)]
-        cnums = [random.randint(1, nclusts) for i in range(np)]
-        scores = [random.random() for i in range(np)]
+        pathways = ["pathway_%d"%i for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
                                   "ClusterNumber": cnums,
                                   "combined_score": scores})
-        print(df)
         contain_score = ps.uniqueness(df, axis= 0)
         separation_score = ps.uniqueness(df, axis = 1)
         # Check output is a float
