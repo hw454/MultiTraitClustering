@@ -1,6 +1,6 @@
 Documentation:
 ==============
-    :ref:`https://multitraitclustering.readthedocs.io/en/latest/``
+    `https://multitraitclustering.readthedocs.io/en/latest/``
 
 Requirements:
 =============
