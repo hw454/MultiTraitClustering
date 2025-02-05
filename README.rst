@@ -1,12 +1,18 @@
+Documentation:
+==============
+    :ref:`https://multitraitclustering.readthedocs.io/en/latest/``
+
 Requirements:
-    python=3.11.9 (not currently compatible with higher versions)
-    scipy
-    scikit-learn
-    scikit-learn-extra
-    numpy
-    pandas
+=============
+    python == 3.11.9 (not currently compatible with higher versions)
+    scipy == 1.15.1
+    scikit-learn == 1.6.1
+    scikit-learn-extra == 0.3.0
+    numpy == 2.2.2
+    pandas == 2.2.3
 
 Setup:
+=======
     Installation:
         ```pip install multitraitclustering```
     Data:
@@ -16,4 +22,5 @@ Setup:
         * P-values and Standard Error values are not yet incorporated into the analysis.
 
 Usage Example:
-    ```
+================
+    ``` ```
