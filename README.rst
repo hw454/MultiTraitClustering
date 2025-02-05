@@ -4,12 +4,12 @@ Documentation:
 
 Requirements:
 =============
-    python == 3.11.9 (not currently compatible with higher versions)
-    scipy == 1.15.1
-    scikit-learn == 1.6.1
-    scikit-learn-extra == 0.3.0
-    numpy == 2.2.2
-    pandas == 2.2.3
+    * python == 3.11.9 (not currently compatible with higher versions)
+    * scipy == 1.15.1
+    * scikit-learn == 1.6.1
+    * scikit-learn-extra == 0.3.0
+    * numpy == 2.2.2
+    * pandas == 2.2.3
 
 Setup:
 =======

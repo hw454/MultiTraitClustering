@@ -492,7 +492,7 @@ def cluster_all_methods(exp_df, assoc_df):
     # Cluster with birch thresh = 2.25
     thresh = 2.25
     branch_fac = 50
-    bir_met = "CosineDistance"
+    dist_met = "CosineDistance"
     method_str = method_string(
         meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
     )

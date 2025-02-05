@@ -1,3 +1,5 @@
+# TODO #6 cluster_methods module docstring
+
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans, DBSCAN, Birch, MiniBatchKMeans
@@ -415,7 +417,6 @@ def dbscan(
         n_dbscan = DBSCAN(
             eps=eps, min_samples=min_s, metric="euclidean", algorithm=db_alg
         ).fit(dist_df.to_numpy())
-        nclust = len(np.unique(n_dbscan.labels_))
         klab = mtc.method_string(meth_str, db_alg, dist_met, min_s)
         res_df[klab] = n_dbscan.labels_
         # Centroid distances
@@ -432,7 +433,6 @@ def dbscan(
         n_dbscan = DBSCAN(
             eps=eps, min_samples=min_s, metric="precomputed", algorithm=db_alg
         ).fit(dist_df.to_numpy())
-        nclust = len(np.unique(n_dbscan.labels_))
         klab = mtc.method_string(meth_str, db_alg, dist_met, min_s)
         res_df[klab] = n_dbscan.labels_
         # Centroid distances
@@ -445,6 +445,7 @@ def dbscan(
             membership=res_df[klab],
             metric="cosine-sim"
         )
+    nclust = len(np.unique(n_dbscan.labels_))
     # Calculate the AIC
     dimension = len(assoc_df.columns)
     db_aic = mtc.get_aic(dist_df, dimension=dimension)
@@ -674,31 +675,27 @@ def birch(assoc_df, dist_df, res_df,
     # VALUE CHECKS
     # ValueError if dist_met not one of "CosineSimilarity" or "Euclidean"
     if dist_met not in [euc_str, cos_str]:
-        error_string = """The input dist_met should be either
-                        {euc}, {cos} not {dist}""".format(
-            euc=euc_str, cos=cos_str, dist=dist_met
-        )
+        error_string = f"""The input dist_met should be either
+                        {euc_str}, {cos_str} not {dist_met}"""
         raise ValueError(error_string)
     # DIMENSION CHECKS
     if assoc_df.shape[0] != res_df.shape[0]:
-        error_string = """"The number of rows in res_df %d
+        error_string = f""""The number of rows in res_df {res_df.shape[0]}
             should match the number of rows in the association
-            data %d""" % (res_df.shape[0], assoc_df.shape[0])
+            data {assoc_df.shape[0]}"""
         raise ValueError(error_string)
     if dist_df.shape[0] != dist_df.shape[1]:
-        error_string = """The number of rows %d should match
-            the number of columns %d in dist_df""" % (dist_df.shape[0],
-                                                      dist_df.shape[1],
-                                                      )
+        error_string = f"""The number of rows {dist_df.shape[0]} should match
+            the number of columns {dist_df.shape[1]} in dist_df"""
         raise ValueError(error_string)
     if dist_df.shape[0] != assoc_df.shape[0]:
-        error_string = """The number of rows in the association data %d
+        error_string = f"""The number of rows in the association data {assoc_df.shape[0]}
             does not match the number of rows in the distance
-            data %d""" % (assoc_df.shape[0], dist_df.shape[0],)
+            data {dist_df.shape[0]}"""
         raise ValueError(error_string)
     # ------------------
     # Run the Clustering
-    meth_str = "Birch" + "%d" % (100 * thresh)
+    meth_str = f"Birch{int(100 * thresh)}"
     birlab = mtc.method_string(meth_str, "", dist_met, branch_fac)
     if dist_met == euc_str:
         brc = Birch(n_clusters=None,
@@ -706,7 +703,6 @@ def birch(assoc_df, dist_df, res_df,
                     branching_factor=branch_fac).fit(dist_df)
         brc_clusts = brc.predict(dist_df)
         res_df[birlab] = brc_clusts
-        birch_clust_opts = np.unique(res_df[birlab])
         # ------------------------
         # Calculate the centroids
         # -----------------------
@@ -726,7 +722,6 @@ def birch(assoc_df, dist_df, res_df,
                     branching_factor=branch_fac).fit(dist_df)
         brc_clusts = brc.predict(dist_df)
         res_df[birlab] = brc_clusts
-        birch_clust_opts = np.unique(res_df[birlab])
         # ------------------------
         # Calculate the centroids
         # -----------------------
@@ -740,6 +735,7 @@ def birch(assoc_df, dist_df, res_df,
             membership=res_df[birlab],
             metric="cosine-dist",
         )
+    birch_clust_opts = np.unique(res_df[birlab])
     # -----------------
     # Calculate the AIC
     dimension = assoc_df.shape[1]
@@ -822,34 +818,27 @@ def kmeans_minibatch(
     # VALUE CHECKS
     # ValueError if dist_met not one of "CosineSimilarity" or "Euclidean"
     if dist_met not in [euc_str, cos_str]:
-        error_string = """The input bir_met should be either
-                        {euc}, {cos} not {dist}""".format(
-            euc=euc_str, cos=cos_str, dist=dist_met
-        )
+        error_string = f"""The input bir_met should be either
+                        {euc_str}, {cos_str} not {dist_met}"""
         raise ValueError(error_string)
     # DIMENSION CHECKS
     if assoc_df.shape[0] != res_df.shape[0]:
-        error_string = """"The number of rows in res_df %d
-        should match the number of rows in the association data %d""" % (
-            res_df.shape[0],
-            assoc_df.shape[0],
-        )
+        error_string = f""""The number of rows in res_df {res_df.shape[0]}
+        should match the number of rows in the association data {assoc_df.shape[0]}"""
         raise ValueError(error_string)
     if dist_df.shape[0] != dist_df.shape[1]:
-        error_string = """The number of rows %d should match
-            the number of columns %d in dist_df""" % (dist_df.shape[0],
-                                                      dist_df.shape[1]
-                                                      )
+        error_string = f"""The number of rows {dist_df.shape[0]} should match
+            the number of columns {dist_df.shape[1]} in dist_df"""
         raise ValueError(error_string)
     if dist_df.shape[0] != assoc_df.shape[0]:
-        error_string = """The number of rows in the association data %d
+        error_string = f"""The number of rows in the association data {assoc_df.shape[0]}
             does not match the number of rows in the distance
-            data %d""" % (assoc_df.shape[0], dist_df.shape[0])
+            data {dist_df.shape[0]}"""
         raise ValueError(error_string)
     # ------------------
     # Run the Clustering
     mini_lab = mtc.method_string(
-        "MiniBatchKmeans" + "%d" % (batch_size), "", dist_met, nclust
+        f"MiniBatchKmeans{batch_size}", "", dist_met, nclust
     )
     if dist_met == euc_str:
         mini_clusts = MiniBatchKMeans(

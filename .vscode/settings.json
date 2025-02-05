@@ -18,7 +18,9 @@
         "Normalise",
         "normalised",
         "npnts",
-        "pdist"
+        "pdist",
+        "pointwise",
+        "rtype"
     ],
     "python.testing.unittestArgs": [
         "-v",
