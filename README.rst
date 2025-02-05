@@ -13,11 +13,15 @@ Requirements:
 
 Setup:
 =======
-    Installation:
-        .. code-block::unix
-        
+
+..
+    TODO get the code-blocks displaying on github!
+
+Installation:
+        .. code-block:: unix
+
             pip install multitraitclustering
-    Data:
+Data:
         * Association Data. This is your master data set with association scores corresponding
         to a collection of GWAS analysis. The columns correspond to traits, the rows and snps and the values are the association between the snp and the trait. This should be stored as a `.csv` file with the trait labels on the first row and the snps on the first column. 
         * Exposure Data. This is a dataset corresponding to only the exposure phenotype and the association with the snps. Also stored as a csv file, rows are snps, one column for the exposure labelled `EXP` and the values are the scores.
@@ -33,7 +37,7 @@ To load data located in a directory named `data` whose parent directory is your 
 The filenames `eff_dfs.csv` and `exp_dfs.csv` can be replaced with alternative filenames to match
 your files. The files must be in `csv` format.
 
-.. code-block::python
+.. code-block:: python
 
     from multitraitclustering import data_setup as ds
     data_sets = ds.load_association_data("./data", 
@@ -42,7 +46,7 @@ your files. The files must be in `csv` format.
 
 This will give an output in the form of:
 
-.. code-block::python
+.. code-block:: python
 
     data_sets = {'eff_df':X1687     X1697     X1717        X20015_irnt  X21001_irnt
     rs115866895  0.086834 -0.970112 -1.105207     0.668033     0.402944    
@@ -61,7 +65,7 @@ This will give an output in the form of:
 Clustering analysis
 --------------------
 
-.. code-block::python
+.. code-block:: python
 
     from multitraitclustering import data_setup as ds
     from multitraitclustering import multi_trait_clustering as mtc
@@ -76,7 +80,7 @@ Clustering analysis
 The results contains the clusters and the clustering parameters `clust_pars_dict`
 and `clust_results`.
 
-.. code-block::python
+.. code-block:: python
 
     clust_pars = cluster_res["clust_pars_dict"]
     clust_df = cluster_res["clust_results"]
