@@ -23,4 +23,56 @@ Setup:
 
 Usage Example:
 ================
-    ``` ```
+
+Loading Data
+------------
+
+To load data located in a directory named `data` whose parent directory is your working directory.
+The filenames `eff_dfs.csv` and `exp_dfs.csv` can be replaced with alternative filenames to match
+your files. The files must be in `csv` format.
+
+```
+from multitraitclustering import data_setup as ds
+    data_sets = ds.load_association_data("./data", 
+                                        eff_fname ="/eff_dfs.csv",
+                                        exp_fname = "/exp_dfs.csv")
+```
+
+This will give an output in the form of:
+```
+{'eff_df':X1687     X1697     X1717        X20015_irnt  X21001_irnt
+ rs115866895  0.086834 -0.970112 -1.105207     0.668033     0.402944    
+ rs4648450   -0.070006 -0.211097 -1.109551     0.114491    -0.253709  
+ rs12024554   0.202266  0.700323 -0.281241     3.877386    -0.650558    
+ rs1097327   -0.047729 -0.370089 -0.148402     0.550493    -0.659329  
+ rs3737992   -0.741344  1.597846 -1.133015     1.346192    -0.489776   ,
+ 'exp_df': 	EXP
+rs115866895	-0.013280
+rs4648450	-0.010908
+rs12024554	-0.009474
+rs1097327	-0.009443
+rs3737992	-0.010055 }
+```
+
+Clustering analysis
+--------------------
+
+```
+from multitraitclustering import data_setup as ds
+from multitraitclustering import multi_trait_clustering as mtc
+
+data_sets = ds.load_association_data("./data", 
+                                    eff_fname ="/eff_dfs.csv",
+                                    exp_fname = "/exp_dfs.csv")
+
+cluster_res = mtc.cluster_all_methods(data_sets["eff_df"], data_sets["exp_df"])
+```
+
+The results contains the clusters and the clustering parameters `clust_pars_dict`
+and `clust_results`.
+
+```
+clust_pars = cluster_res["clust_pars_dict"]
+clust_df = cluster_res["clust_results"]
+
+```
