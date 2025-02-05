@@ -32,6 +32,7 @@ The filenames `eff_dfs.csv` and `exp_dfs.csv` can be replaced with alternative f
 your files. The files must be in `csv` format.
 
 ```
+
 from multitraitclustering import data_setup as ds
     data_sets = ds.load_association_data("./data", 
                                         eff_fname ="/eff_dfs.csv",
@@ -40,6 +41,7 @@ from multitraitclustering import data_setup as ds
 
 This will give an output in the form of:
 ```
+
 {'eff_df':X1687     X1697     X1717        X20015_irnt  X21001_irnt
  rs115866895  0.086834 -0.970112 -1.105207     0.668033     0.402944    
  rs4648450   -0.070006 -0.211097 -1.109551     0.114491    -0.253709  
@@ -58,6 +60,7 @@ Clustering analysis
 --------------------
 
 ```
+
 from multitraitclustering import data_setup as ds
 from multitraitclustering import multi_trait_clustering as mtc
 
@@ -72,6 +75,7 @@ The results contains the clusters and the clustering parameters `clust_pars_dict
 and `clust_results`.
 
 ```
+
 clust_pars = cluster_res["clust_pars_dict"]
 clust_df = cluster_res["clust_results"]
 
