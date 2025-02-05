@@ -165,6 +165,7 @@ def load_association_data(path_dir, eff_fname = "/transformed_eff_dfs.csv",
         out (dict): Dictionary containing the dataframe for the association 
         values and the standard errors.
     """
+    # TODO #1 add optional input of predefined snps list to crop data by
     # Check all files exist
     if not os.path.exists(path_dir):
         error_string = "Requested directory " + path_dir + " does not exist."
