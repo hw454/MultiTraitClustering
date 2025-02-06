@@ -123,6 +123,7 @@ def chart_cluster_compare(data_array, xlabels, ylabels, x_lab, y_lab, z_lab, tex
     source = pd.DataFrame({x_lab: x.ravel(),
                      y_lab: y.ravel(),
                      z_lab: z.ravel()})
+    print(x_clust)
     for i in range(0, xlen):
         source.loc[source[x_lab] == i, x_lab] = x_clust[i]
     for j in range(0, ylen):

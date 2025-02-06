@@ -97,123 +97,48 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     score = ssd(max_mat, mat_norm)
     return score
 
-def assign_max_and_crop(mat):
-    """
-    assign_max_and_crop Fix row with max for each col. Crop data left from duplicates
-
-    Fix the rows which are the maximum for only one column.
-
-    Rows which are the maximum for multiple columns are assigned to the column with the
-    largest value.
-
-    The matrix is returned with the fixed rows and columns set to zero.
-
-    :param mat: Original data matrix
-    :type mat: np.ndarray
-    :param out_mat:
-    :return: `fixed_positions` - the fixed rows, 
-             `col_pairs` - their paired columns,
-             `out_mat` - the cropped matrix
-    :rtype: dict
-    """
-    # Verify Types
-    if not isinstance(mat, np.ndarray):
-        error_string = f"mat should be numpy array not {type(mat)}"
-        raise TypeError(error_string)
-    out_mat = np.zeros(mat.shape)
-    # Initialise - For each column get the row with the highest score
-    positions = np.argmax(mat, axis = 0)
-    # Are any of the rows repeated?
-    unique_ps, counts = np.unique(positions, return_counts = True)
-    # Number of unique rows found
-    nu = len(unique_ps)
-    # All rows with count > 1 need to be assessed
-    reassign_ps = [unique_ps[i] for i in range(nu) if counts[i] > 1]
-    # All rows with count 1 can be fixed
-    fixed_ps = [unique_ps[i] for i in range(nu) if counts[i] == 1]
-    # Fix the columns for the fixed rows.
-    col_pairs = [positions[positions == p] for p in fixed_ps]
-    # Which rows can still be considered?
-    # Note this will consider rows fixed on previous iterations but their values
-    # will be zero from the cropping so they shouldn't get picked up
-    consider_rows = [i for i in range(mat.shape[0]) if i not in fixed_ps]
-    # For each row needing reassignment fix the column with the largest value.
-    # This will only consider the unassigned columns as the fixed ones will have zero values.
-    for p in reassign_ps:
-        cols = positions[positions == p]
-        max_col = np.argmax(mat[p, cols], axis = 1)
-        cols_not_max = cols[cols != max_col]
-        consider_rows.remove(p)
-        fixed_ps += [p]
-        col_pairs += [max_col]
-        out_mat[consider_rows, cols_not_max] = mat[consider_rows, cols_not_max]
-    out_dict = {"fixed_positions": fixed_ps,
-                "col_pairs": col_pairs,
-                "out_mat": out_mat}
-    return out_dict
-
-# TODO test overall paths function. Redesign to remove nesting. Recursion?
-def overall_paths(df, score_lab = "combined_score"):
-    """
-    overall_paths Score for how well clusters identify pathways
-    
-    Creates a score that describes how close the pathway cluster scores are
-    clusters identifying unique pathways.
-
-    Clusters matched to their highest scoring pathway. If this pathway is matched elsewhere
-    the cluster with the highest score keeps the pathway, the other cluster goes to it's next
-    highest path. Once each cluster is assigned a unique pathway the pathway set is fixed.
-
-    Crop the original data to just the scores for the identified pathways. 
-
-    Create the ideal matrix this is all zeros except for ones on the pathway cluster pairs.
-
-    The score is the ssd between the cropped data and the ideal matrix
-
-    :param df: columns are: `pathway`, `ClusterNumber` and `combined_score`.
-    :type df: pd.DataFrame
-    :param score_lab: col label for score, defaults to "combined_score"
-    :type score_lab: str, optional
-    """
-    # Verify Types
-    if not isinstance(df, pd.DataFrame):
-        error_string = f"""df should be a pandas dataframe not {type(df)}"""
-        TypeError(error_string)
-    # Verify Columns Labels
-    if "pathway" not in df.columns:
-        error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
-    if "ClusterNumber" not in df.columns:
-        error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
-    # Verify score_lab is a valid column
-    if score_lab not in df.columns:
-        error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
-    df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
-    mat = np.nan_to_num(df_wide.to_numpy())
-    # Get the row number for the maximum in each column
-    # For any repeated row numbers get the row number of the second highest
-    # Repeat until square matrix (Cropped matrix)
-    # Construct matrix of ones in these positions - this is the ideal matrix.
-    # Find the sum of the square difference between the cropped matrix and the ideal matrix
-    #-----------------
-    positions = []
-    col_pairs = []
-    out_mat = mat.copy()
-    for i in range(mat.shape[1]):
-        # Max number of iterations is the number of columns
-        out_dict = assign_max_and_crop(out_mat)
-        positions += out_dict["fixed_positions"]
-        col_pairs += out_dict["col_pairs"]
-        out_mat = out_mat["out_mat"]
-        if len(positions) >= mat.shape[1]:
-            break
-    crop_mat = mat[positions, :]
-    ideal_mat = np.zeros(crop_mat.shape)
-    ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
-    score = ssd(crop_mat, ideal_mat)
-    return(score)
+# #### Overall pathway score
+# # TODO #9 test overall paths function. Redesign to remove nesting. Recursion?
+# def overall_paths(df, score_lab = "combined_score"):
+#     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
+#     mat = np.nan_to_num(df_wide.to_numpy())
+#     # Get the row number for the maximum in each column
+#     # For any repeated row numbers get the row number of the second highest
+#     # Repeat until square matrix (Cropped matrix)
+#     # Construct matrix of ones in these positions - this is the ideal matrix.
+#     # Find the sum of the square difference between the cropped matrix and the ideal matrix
+#     positions = np.argmax(mat, axis = 0)
+#     uniques, counts = np.unique(positions, return_counts = True)
+#     nu = len(uniques)
+#     if not len(positions) == nu:
+#        for i in range(nu):
+#           if counts[i]>1:
+#              row = uniques[i]
+#              cols = positions[positions==row]
+#              max_col = np.argmax(mat[row, cols])
+#              cols_no_max = cols[cols != max_col]
+#              j = 2
+#              for c in cols_no_max:
+#                 next_max = np.partition(mat[:, c].flatten(), -j)[-j]
+#                 row_2 = np.where(mat[:,c]==next_max)
+#                 if row_2 in positions:
+#                   j +=1
+#                 else:
+#                   break
+#                 positions[c] = row_2
+#     crop_mat = mat[positions, :]
+#     if crop_mat.max() != crop_mat.min():
+#       rescale_crop_mat = (crop_mat - crop_mat.min())/ (crop_mat.max() - crop_mat.min())
+#     else:
+#       rescale_crop_mat = np.zeros(crop_mat.shape)
+#     ideal_mat = np.zeros(df_wide.shape)
+#     k=0
+#     for p in positions:
+#        ideal_mat[p, k] = 1
+#        k+=1
+#     ideal_mat = ideal_mat[positions,: ]
+#     score = ssd(rescale_crop_mat, ideal_mat)
+#     return(score)
 
 # #### Score shift for making high values good
 # # TODO #10 build `redirect` into original pathway score
