@@ -285,7 +285,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
-   
+
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Get the row number for the maximum in each column
@@ -297,7 +297,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     positions = []
     col_pairs = []
     out_mat = mat.copy()
-    for i in range(mat.shape[1]):
+    for _ in range(mat.shape[1]):
         # Max number of iterations is the number of columns
         out_dict = assign_max_and_crop(out_mat)
         positions += out_dict["fixed_positions"]
