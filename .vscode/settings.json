@@ -18,6 +18,7 @@
         "Normalise",
         "normalised",
         "npnts",
+        "nterms",
         "pdist",
         "pointwise",
         "rtype"

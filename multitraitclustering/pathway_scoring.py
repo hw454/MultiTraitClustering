@@ -153,7 +153,6 @@ def assign_max_and_crop(mat):
                 "out_mat": out_mat}
     return out_dict
 
-# TODO #12 test overall paths function.
 def overall_paths(df, score_lab = "combined_score"):
     """
     overall_paths Score for how well clusters identify pathways
@@ -191,6 +190,24 @@ def overall_paths(df, score_lab = "combined_score"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
+    ideal_mat = np.zeros(mat.shape)
+    ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
+    ideal_mat = ideal_mat[positions,:]
+    score = ssd(crop_mat, ideal_mat)
+    return(score)
+
+# #### Score shift for making high values good
+# # TODO #10 build `redirect` into original pathway score
+# def redirect_score(score):
+#   if score == "NaN":
+#       r_score = None
+#   else:
+#       r_score = 1/(0.01+score)
+#   return(r_score)
+
+# #### The best matches of pathway to clusters
+# # TODO #11 test best matches
+def path_best_matches(df, score_lab = "combined_score"):
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Get the row number for the maximum in each column
@@ -211,53 +228,7 @@ def overall_paths(df, score_lab = "combined_score"):
         if len(positions) >= mat.shape[1]:
             break
     crop_mat = mat[positions, :]
-    ideal_mat = np.zeros(mat.shape)
-    ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
-    ideal_mat = ideal_mat[positions,:]
-    score = ssd(crop_mat, ideal_mat)
-    return(score)
-
-# #### Score shift for making high values good
-# # TODO #10 build `redirect` into original pathway score
-# def redirect_score(score):
-#   if score == "NaN":
-#       r_score = None
-#   else:
-#       r_score = 1/(0.01+score)
-#   return(r_score)
-
-# #### The best matches of pathway to clusters
-# # TODO #11 test best matches
-# def path_best_matches(df, score_lab = "combined_score"):
-#     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
-#     mat = np.nan_to_num(df_wide.to_numpy())
-#     # Get the row number for the maximum in each column
-#     # For any repeated row numbers get the row number of the second highest
-#     # Repeat until square matrix (Cropped matrix)
-#     # Construct matrix of ones in these positions - this is the ideal matrix.
-#     # Find the sum of the square difference between the cropped matrix and the ideal matrix
-#     positions = np.argmax(mat, axis = 0)
-#     uniques, counts = np.unique(positions, return_counts = True)
-#     nu = len(uniques)
-#     if not len(positions) == nu:
-#       for i in range(nu):
-#         if counts[i] > 1:
-#           row = uniques[i]
-#           cols = positions[positions == row]
-#           max_col = np.argmax(mat[row, cols])
-#           cols_no_max = cols[cols != max_col]
-#           j = 2
-#           for c in cols_no_max:
-#             next_max = np.partition(mat[:, c].flatten(), -j)[-j]
-#             row_2 = np.where(mat[:, c] == next_max)
-#             if row_2 in positions:
-#               j += 1
-#             else:
-#               break
-#             positions[c] = row_2
-#     paths = list(df_wide.index[positions])
-#     crop_mat = df[df.pathway.isin(paths)].fillna(0)
-#     return(crop_mat)
+    return crop_mat
 
 # #### All pathway scores on set of clusters
 # # TODO test pathway scoring. Separation score should not be returning so many NaNs
