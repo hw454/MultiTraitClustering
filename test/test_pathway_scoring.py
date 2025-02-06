@@ -79,6 +79,68 @@ class TestPathwayScoring(unittest.TestCase):
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
         self.assertRaises(ValueError, ps.uniqueness,
                           df = df_no_clusts)
+    def test_assign_max_and_crop(self):
+        """
+        test_assign_max_and_crop  Find row with max value for cols, crops data for duplicates.
+        """
+        nr = 302
+        nc = 6
+        nterms = 50
+        a = np.empty((nr, nc))
+        a[:] = np.nan
+        rows = [[random.randint(0, nr-1) for i in range(nterms)] for j in range(nc)]
+        for j in range(nc):
+            a[rows[j],j] = [random.random() for i in range(nterms)]
+        one_pass = ps.assign_max_and_crop(a)
+        # Check output is a dictionary
+        self.assertTrue(isinstance(one_pass, dict))
+        # Check the types of the terms in the output
+        self.assertTrue(isinstance(one_pass["out_mat"], np.ndarray))
+        self.assertTrue(isinstance(one_pass["fixed_positions"], list))
+        self.assertTrue(isinstance(one_pass["col_pairs"], list))
+        # Check for repeated max's
+        max_val = np.nan_to_num(a).max()
+        a[5,[0,3]] = max_val + 5
+        one_pass = ps.assign_max_and_crop(a)
+        # Check output is a dictionary
+        self.assertTrue(isinstance(one_pass, dict))
+        # Check the types of the terms in the output
+        self.assertTrue(isinstance(one_pass["out_mat"], np.ndarray))
+        self.assertTrue(isinstance(one_pass["fixed_positions"], list))
+        self.assertTrue(isinstance(one_pass["col_pairs"], list))
+        # -------------------------------
+        # NEGATIVE CHECKS
+        self.assertRaises(TypeError, ps.assign_max_and_crop, mat = 4)
+    def test_overall_paths(self):
+        """
+        test_overall_paths get an overall pathway score for clusters
+        """
+        npoints = 300
+        nclusts = 6
+        pathways = ["pathway_%d"%i for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+                                  "ClusterNumber": cnums,
+                                  "combined_score": scores})
+        score = ps.overall_paths(df)
+        # Check output is float
+        self.assertTrue(isinstance(score, float))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.overall_paths, df.to_numpy())
+        # ValueError if score_lab is not a valid label
+        self.assertRaises(ValueError, ps.overall_paths, df,
+                          score_lab = "CombinedScore")
+        # ValueError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(ValueError, ps.uniqueness,
+                          df = df_no_path)
+        # ValueError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(ValueError, ps.uniqueness,
+                          df = df_no_clusts)
      
 if __name__ == '__main__':
     unittest.main()
