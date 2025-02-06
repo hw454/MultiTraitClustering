@@ -94,7 +94,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     # Create the ideal matrix
     max_mat[np.argmax(mat_norm, axis = 0)] = 1
     # Score the difference between the normalised and ideal matrix
-    score = ssd(max_mat, mat_norm)
+    score = redirect_score(ssd(max_mat, mat_norm))
     return score
 
 def assign_max_and_crop(mat):
@@ -152,7 +152,6 @@ def assign_max_and_crop(mat):
                 "out_mat": out_mat}
     return out_dict
 
-# TODO test overall paths function. Redesign to remove nesting. Recursion?
 def overall_paths(df, score_lab = "combined_score"):
     """
     overall_paths Score for how well clusters identify pathways
@@ -178,7 +177,7 @@ def overall_paths(df, score_lab = "combined_score"):
     # Verify Types
     if not isinstance(df, pd.DataFrame):
         error_string = f"""df should be a pandas dataframe not {type(df)}"""
-        TypeError(error_string)
+        raise TypeError(error_string)
     # Verify Columns Labels
     if "pathway" not in df.columns:
         error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
@@ -212,17 +211,38 @@ def overall_paths(df, score_lab = "combined_score"):
     crop_mat = mat[positions, :]
     ideal_mat = np.zeros(crop_mat.shape)
     ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
-    score = ssd(crop_mat, ideal_mat)
-    return(score)
+    score = redirect_score(ssd(crop_mat, ideal_mat))
+    return score
 
-# #### Score shift for making high values good
-# # TODO #10 build `redirect` into original pathway score
-# def redirect_score(score):
-#   if score == "NaN":
-#       r_score = None
-#   else:
-#       r_score = 1/(0.01+score)
-#   return(r_score)
+# TODO #14 build `redirect` into original pathway score
+def redirect_score(score):
+    """Score shift for making high values good
+    
+    Args:
+        score (float): score value to be reassigned
+        
+    Raise:
+        TypeError: score not string or float
+        
+    Returns:
+        * None if score == "NaN"
+        * 1/(0.01+score) if not """
+    if not isinstance(score, (float, int, str)):
+        error_string = f"""score should be a float, an int or a str not {type(score)}"""
+        raise TypeError(error_string)
+    if isinstance(score, str):
+        if score != "NaN":
+            error_string = f"""when score is a string is should be 'NaN' not {score}"""
+            raise ValueError(error_string)
+    if not isinstance(score, str):
+        if score < 0:
+            error_string = "score should be non-negative"
+            raise ValueError(error_string)
+    if isinstance(score, str):
+        r_score = None
+    else:
+        r_score = 1/(0.01+score)
+    return r_score
 
 # #### The best matches of pathway to clusters
 # # TODO #11 test best matches
