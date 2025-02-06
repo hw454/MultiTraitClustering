@@ -91,8 +91,8 @@ def get_pathway_rows_from_data(data, c_num_lab):
     if not isinstance(data, list):
         raise TypeError(f"data should be a list, not {type(data)}")
     # Check that data contains the necessary terms
-    if len(data) != 7:
-        error_string = """data should contain exactly 7 elements: rank, pathway,
+    if len(data) < 7:
+        error_string = """data should contain at least 7 elements: rank, pathway,
             pval, OR, score, overlap_genes, adjust_pval"""
         raise ValueError(error_string)
     if not isinstance(data[0], int):
@@ -254,7 +254,7 @@ def enrich_clust(gene_set, meth_key, c_num_lab, gene_library, req_ses, max_tries
             out_rows = get_pathway_rows_from_data(data[i], c_num_lab)
             score_clust_list += [out_rows["score_row"]]
             all_clust_list += [out_rows["all_row"]]
-            or_clust_list += [out_rows["OR_row"]]
+            or_clust_list += [out_rows["or_row"]]
     else:
         all_clust_list = [{"ClusterNumber": c_num_lab,
                           "pathway": "NoPathway",

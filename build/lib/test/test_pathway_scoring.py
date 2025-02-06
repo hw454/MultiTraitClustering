@@ -48,7 +48,7 @@ class TestPathwayScoring(unittest.TestCase):
         """
         npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(npoints)]
+        pathways = [f"pathway_{i}" for i in range(npoints)]
         cnums = [random.randint(1, nclusts) for i in range(npoints)]
         scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
@@ -117,7 +117,7 @@ class TestPathwayScoring(unittest.TestCase):
         """
         npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(npoints)]
+        pathways = [f"pathway_{i}" for i in range(npoints)]
         cnums = [random.randint(1, nclusts) for i in range(npoints)]
         scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
@@ -165,7 +165,7 @@ class TestPathwayScoring(unittest.TestCase):
         """
         npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(npoints)]
+        pathways = [f"pathway_{i}" for i in range(npoints)]
         cnums = [random.randint(1, nclusts) for i in range(npoints)]
         scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
@@ -203,7 +203,7 @@ class TestPathwayScoring(unittest.TestCase):
         """
         npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(npoints)]
+        pathways = [f"pathway_{i}" for i in range(npoints)]
         cnums = [random.randint(1, nclusts) for i in range(npoints)]
         scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
@@ -235,7 +235,7 @@ class TestPathwayScoring(unittest.TestCase):
 # * Identity matrix should score minimum.
 # * Permuted identity should also score minimum.
 # * Identity + Grey squares should score minimum + grey values * number of grey squares.
-# * Constant matrix should score maximum. 
+# * Constant matrix should score maximum.
 # nsq=6
 # grey_val = 0.5
 # n_grey = 2
