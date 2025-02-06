@@ -94,7 +94,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     # Create the ideal matrix
     max_mat[np.argmax(mat_norm, axis = 0)] = 1
     # Score the difference between the normalised and ideal matrix
-    score = ssd(max_mat, mat_norm)
+    score = redirect_score(ssd(max_mat, mat_norm))
     return score
 
 def assign_max_and_crop(mat):
@@ -228,7 +228,10 @@ def path_best_matches(df, score_lab = "combined_score"):
         if len(positions) >= mat.shape[1]:
             break
     crop_mat = mat[positions, :]
-    return crop_mat
+    ideal_mat = np.zeros(crop_mat.shape)
+    ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
+    score = ssd(crop_mat, ideal_mat)
+    return(score)
 
 # #### All pathway scores on set of clusters
 # # TODO test pathway scoring. Separation score should not be returning so many NaNs

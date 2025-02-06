@@ -141,6 +141,24 @@ class TestPathwayScoring(unittest.TestCase):
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
         self.assertRaises(ValueError, ps.uniqueness,
                           df = df_no_clusts)
-     
+    def test_redirect_score(self):
+        """
+        test_redirect_score Makes low values high and vise versa.
+        """
+        # Check for int input
+        self.assertTrue(isinstance(ps.redirect_score(15), float))
+        # Check for float input
+        self.assertTrue(isinstance(ps.redirect_score(13.2), float))
+        # Check for "Nan" input
+        self.assertIsNone(ps.redirect_score("NaN"))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # Input is negative
+        self.assertRaises(ValueError, ps.redirect_score, score = -4)
+        # Input is an invalid string
+        self.assertRaises(ValueError, ps.redirect_score, score = "invalid")
+        # Input is the wrong type
+        self.assertRaises(TypeError, ps.redirect_score, score = np.zeros((3,2)))
+
 if __name__ == '__main__':
     unittest.main()
