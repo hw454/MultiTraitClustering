@@ -94,7 +94,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     # Create the ideal matrix
     max_mat[np.argmax(mat_norm, axis = 0)] = 1
     # Score the difference between the normalised and ideal matrix
-    score = ssd(max_mat, mat_norm)
+    score = redirect_score(ssd(max_mat, mat_norm))
     return score
 
 def assign_max_and_crop(mat):
@@ -190,20 +190,26 @@ def overall_paths(df, score_lab = "combined_score"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
+    df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
+    mat = np.nan_to_num(df_wide.to_numpy())
+    # Compute the best match matrix and get the corresponding indexes
+    best_mat_out= path_best_matches(df, score_lab=score_lab)
+    crop_mat = best_mat_out["best_mat"]
+    rows = best_mat_out["row_positions"]
+    cols = best_mat_out["col_pairs"]
+    # Compute the overall score using the best match matrix
     ideal_mat = np.zeros(mat.shape)
-    ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
-    ideal_mat = ideal_mat[positions,:]
-    score = ssd(crop_mat, ideal_mat)
-    return(score)
+    ideal_mat[rows, cols] = mat[rows, cols]
+    ideal_mat = ideal_mat[rows,:]
+    score = redirect_score(ssd(crop_mat, ideal_mat))
+    return score
 
-# #### Score shift for making high values good
-# # TODO #10 build `redirect` into original pathway score
-# def redirect_score(score):
-#   if score == "NaN":
-#       r_score = None
-#   else:
-#       r_score = 1/(0.01+score)
-#   return(r_score)
+def redirect_score(score):
+    if score == "NaN":
+        r_score = None
+    else:
+        r_score = 1/(0.01+score)
+    return r_score 
 
 # #### The best matches of pathway to clusters
 # # TODO #11 test best matches
@@ -228,7 +234,10 @@ def path_best_matches(df, score_lab = "combined_score"):
         if len(positions) >= mat.shape[1]:
             break
     crop_mat = mat[positions, :]
-    return crop_mat
+    best_dict = {"best_mat": crop_mat,
+                 "row_positions": positions,
+                 "col_pairs": col_pairs}
+    return best_dict
 
 # #### All pathway scores on set of clusters
 # # TODO test pathway scoring. Separation score should not be returning so many NaNs
