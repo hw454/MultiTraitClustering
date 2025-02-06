@@ -160,20 +160,24 @@ def overall_paths(df, score_lab = "combined_score"):
     Creates a score that describes how close the pathway cluster scores are
     clusters identifying unique pathways.
 
-    Clusters matched to their highest scoring pathway. If this pathway is matched elsewhere
-    the cluster with the highest score keeps the pathway, the other cluster goes to it's next
-    highest path. Once each cluster is assigned a unique pathway the pathway set is fixed.
-
-    Crop the original data to just the scores for the identified pathways. 
+    Create the best_matches matrix using `path_best_matches`.
 
     Create the ideal matrix this is all zeros except for ones on the pathway cluster pairs.
 
     The score is the ssd between the cropped data and the ideal matrix
 
-    :param df: columns are: `pathway`, `ClusterNumber` and `combined_score`.
-    :type df: pd.DataFrame
-    :param score_lab: col label for score, defaults to "combined_score"
-    :type score_lab: str, optional
+    Args:
+        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `combined_score`.
+        score_lab (str, optional): col label for score, defaults to "combined_score"
+    
+    Raise:
+        TypeError: df not a pandas dataframe
+        ValueError: pathway not in df columns
+        ValueError: ClusterNumber not in df clumns
+        ValueError: score_lab not in df columns
+
+    Returns:
+        score (float)
     """
     # Verify Types
     if not isinstance(df, pd.DataFrame):
@@ -233,9 +237,55 @@ def redirect_score(score):
         r_score = 1/(0.01+score)
     return r_score
 
-# #### The best matches of pathway to clusters
-# # TODO #11 test best matches
 def path_best_matches(df, score_lab = "combined_score"):
+    """
+    overall_paths Score for how well clusters identify pathways
+    
+    Creates a score that describes how close the pathway cluster scores are
+    clusters identifying unique pathways.
+
+    Clusters matched to their highest scoring pathway. If this pathway is matched elsewhere
+    the cluster with the highest score keeps the pathway, the other cluster goes to it's next
+    highest path. Once each cluster is assigned a unique pathway the pathway set is fixed.
+
+    Crop the original data to just the scores for the identified pathways. 
+
+    Create the ideal matrix this is all zeros except for ones on the pathway cluster pairs.
+
+    The score is the ssd between the cropped data and the ideal matrix
+
+    Args:
+        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `combined_score`.
+        score_lab (str, optional): col label for score, defaults to "combined_score"
+    
+    Raise:
+        TypeError: df not a pandas dataframe
+        ValueError: pathway not in df columns
+        ValueError: ClusterNumber not in df clumns
+        ValueError: score_lab not in df columns
+
+    Returns:
+        out_dict (dict):
+        * "best_mat" (np.ndarray) best matches array
+        * "row_positions" (list) the rows for the best matches
+        * "col_pairs" (list) the columns paired with the rows
+    """
+    # Verify Types
+    if not isinstance(df, pd.DataFrame):
+        error_string = f"""df should be a pandas dataframe not {type(df)}"""
+        raise TypeError(error_string)
+    # Verify Columns Labels
+    if "pathway" not in df.columns:
+        error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_string)
+    if "ClusterNumber" not in df.columns:
+        error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_string)
+    # Verify score_lab is a valid column
+    if score_lab not in df.columns:
+        error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_string)
+    
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Get the row number for the maximum in each column

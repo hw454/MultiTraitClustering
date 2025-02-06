@@ -135,11 +135,11 @@ class TestPathwayScoring(unittest.TestCase):
                           score_lab = "CombinedScore")
         # ValueError when `pathway` is not a column
         df_no_path = df.rename(columns={'pathway':'paths'})
-        self.assertRaises(ValueError, ps.uniqueness,
+        self.assertRaises(ValueError, ps.overall_paths,
                           df = df_no_path)
         # ValueError when `ClusterNumber` is not a column
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
-        self.assertRaises(ValueError, ps.uniqueness,
+        self.assertRaises(ValueError, ps.overall_paths,
                           df = df_no_clusts)
     def test_redirect_score(self):
         """
@@ -159,6 +159,40 @@ class TestPathwayScoring(unittest.TestCase):
         self.assertRaises(ValueError, ps.redirect_score, score = "invalid")
         # Input is the wrong type
         self.assertRaises(TypeError, ps.redirect_score, score = np.zeros((3,2)))
+    def test_path_best_matches(self):
+        """
+        test_overall_paths get an overall pathway score for clusters
+        """
+        npoints = 300
+        nclusts = 6
+        pathways = ["pathway_%d"%i for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+                                  "ClusterNumber": cnums,
+                                  "combined_score": scores})
+        best_out = ps.path_best_matches(df)
+        # Check output is dict
+        self.assertTrue(isinstance(best_out, dict))
+        # Check types of the terms in the dict
+        self.assertTrue(isinstance(best_out["best_mat"], np.ndarray))
+        self.assertTrue(isinstance(best_out["row_positions"], list))
+        self.assertTrue(isinstance(best_out["col_pairs"], list))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.path_best_matches, df.to_numpy())
+        # ValueError if score_lab is not a valid label
+        self.assertRaises(ValueError, ps.path_best_matches, df,
+                          score_lab = "CombinedScore")
+        # ValueError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(ValueError, ps.path_best_matches,
+                          df = df_no_path)
+        # ValueError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(ValueError, ps.path_best_matches,
+                          df = df_no_clusts)
 
 if __name__ == '__main__':
     unittest.main()
