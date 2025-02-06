@@ -205,11 +205,33 @@ def overall_paths(df, score_lab = "combined_score"):
     return score
 
 def redirect_score(score):
-    if score == "NaN":
+    """Score shift for making high values good
+    
+    Args:
+        score (float): score value to be reassigned
+        
+    Raise:
+        TypeError: score not string or float
+        
+    Returns:
+        * None if score == "NaN"
+        * 1/(0.01+score) if not """
+    if not isinstance(score, (float, int, str)):
+        error_string = f"""score should be a float, an int or a str not {type(score)}"""
+        raise TypeError(error_string)
+    if isinstance(score, str):
+        if score != "NaN":
+            error_string = f"""when score is a string is should be 'NaN' not {score}"""
+            raise ValueError(error_string)
+    if not isinstance(score, str):
+        if score < 0:
+            error_string = "score should be non-negative"
+            raise ValueError(error_string)
+    if isinstance(score, str):
         r_score = None
     else:
         r_score = 1/(0.01+score)
-    return r_score 
+    return r_score
 
 # #### The best matches of pathway to clusters
 # # TODO #11 test best matches
