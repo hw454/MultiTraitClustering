@@ -63,10 +63,10 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
         raise TypeError(error_string)
     # Verify Columns Labels
     if "pathway" not in df.columns:
-        error_string = f"""column `pathway` should be in df. Available cols: {str(df.columns)}"""
+        error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
     if "ClusterNumber" not in df.columns:
-        error_string = f"""column `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
+        error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
     # Verify axis is either 0 or 1
     if not (axis == 0 or axis == 1):
@@ -116,6 +116,7 @@ def assign_max_and_crop(mat):
              `out_mat` - the cropped matrix
     :rtype: dict
     """
+    mat = np.nan_to_num(mat)
     # Verify Types
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
@@ -132,7 +133,7 @@ def assign_max_and_crop(mat):
     # All rows with count 1 can be fixed
     fixed_ps = [unique_ps[i] for i in range(nu) if counts[i] == 1]
     # Fix the columns for the fixed rows.
-    col_pairs = [positions[positions == p] for p in fixed_ps]
+    col_pairs = [np.where(positions==p)[0][0] for p in fixed_ps]
     # Which rows can still be considered?
     # Note this will consider rows fixed on previous iterations but their values
     # will be zero from the cropping so they shouldn't get picked up
@@ -140,8 +141,8 @@ def assign_max_and_crop(mat):
     # For each row needing reassignment fix the column with the largest value.
     # This will only consider the unassigned columns as the fixed ones will have zero values.
     for p in reassign_ps:
-        cols = positions[positions == p]
-        max_col = np.argmax(mat[p, cols], axis = 1)
+        cols = np.where(positions == p)[0]
+        max_col = cols[np.argmax(mat[p, cols])]
         cols_not_max = cols[cols != max_col]
         consider_rows.remove(p)
         fixed_ps += [p]
@@ -152,7 +153,7 @@ def assign_max_and_crop(mat):
                 "out_mat": out_mat}
     return out_dict
 
-# TODO test overall paths function. Redesign to remove nesting. Recursion?
+# TODO #12 test overall paths function.
 def overall_paths(df, score_lab = "combined_score"):
     """
     overall_paths Score for how well clusters identify pathways
@@ -178,7 +179,7 @@ def overall_paths(df, score_lab = "combined_score"):
     # Verify Types
     if not isinstance(df, pd.DataFrame):
         error_string = f"""df should be a pandas dataframe not {type(df)}"""
-        TypeError(error_string)
+        raise TypeError(error_string)
     # Verify Columns Labels
     if "pathway" not in df.columns:
         error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
@@ -206,12 +207,13 @@ def overall_paths(df, score_lab = "combined_score"):
         out_dict = assign_max_and_crop(out_mat)
         positions += out_dict["fixed_positions"]
         col_pairs += out_dict["col_pairs"]
-        out_mat = out_mat["out_mat"]
+        out_mat = out_dict["out_mat"]
         if len(positions) >= mat.shape[1]:
             break
     crop_mat = mat[positions, :]
-    ideal_mat = np.zeros(crop_mat.shape)
+    ideal_mat = np.zeros(mat.shape)
     ideal_mat[positions, col_pairs] = mat[positions, col_pairs]
+    ideal_mat = ideal_mat[positions,:]
     score = ssd(crop_mat, ideal_mat)
     return(score)
 
