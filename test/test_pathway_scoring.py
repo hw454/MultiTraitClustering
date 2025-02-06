@@ -193,6 +193,44 @@ class TestPathwayScoring(unittest.TestCase):
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
         self.assertRaises(ValueError, ps.path_best_matches,
                           df = df_no_clusts)
+    def test_clust_path_score(self):
+        """Tests the `clust_path_score` function in the pathway_scoring module.
+        This test verifies that the clust_path_score function correctly calculates
+        the pathway scores for given clusters. It checks the accuracy and correctness
+        of the scoring mechanism by comparing the output with expected results.
+        Raises:
+            AssertionError: If clust_path_Score fails the tests
+        """
+        npoints = 300
+        nclusts = 6
+        pathways = ["pathway_%d"%i for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+                                  "ClusterNumber": cnums,
+                                  "combined_score": scores})
+        score_out = ps.clust_path_score(df)
+        # Check output is dict
+        self.assertTrue(isinstance(score_out, dict))
+        # Check types of the terms in the dict
+        self.assertTrue(isinstance(score_out["PathContaining"], float))
+        self.assertTrue(isinstance(score_out["PathSeparating"], float))
+        self.assertTrue(isinstance(score_out["OverallPathway"], float))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.clust_path_score, df.to_numpy())
+        # ValueError if score_lab is not a valid label
+        self.assertRaises(ValueError, ps.clust_path_score, df,
+                          score_lab = "CombinedScore")
+        # ValueError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(ValueError, ps.clust_path_score,
+                          df = df_no_path)
+        # ValueError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(ValueError, ps.clust_path_score,
+                          df = df_no_clusts)
 
 if __name__ == '__main__':
     unittest.main()

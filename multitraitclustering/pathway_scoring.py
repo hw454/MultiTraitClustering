@@ -74,8 +74,8 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
         raise ValueError(error_string)
     # Verify score_lab is a valid column
     if score_lab not in df.columns:
-        error_string = f"""score_lab {score_lab} should be a column in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        error_str = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_str)
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     if df_wide.shape[1]==1 and axis ==1:
         return "NaN"
@@ -173,7 +173,7 @@ def overall_paths(df, score_lab = "combined_score"):
     Raise:
         TypeError: df not a pandas dataframe
         ValueError: pathway not in df columns
-        ValueError: ClusterNumber not in df clumns
+        ValueError: ClusterNumber not in df columns
         ValueError: score_lab not in df columns
 
     Returns:
@@ -261,7 +261,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     Raise:
         TypeError: df not a pandas dataframe
         ValueError: pathway not in df columns
-        ValueError: ClusterNumber not in df clumns
+        ValueError: ClusterNumber not in df columns
         ValueError: score_lab not in df columns
 
     Returns:
@@ -285,7 +285,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
-    
+   
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Get the row number for the maximum in each column
@@ -311,17 +311,36 @@ def path_best_matches(df, score_lab = "combined_score"):
                  "col_pairs": col_pairs}
     return best_dict
 
-# #### All pathway scores on set of clusters
-# # TODO test pathway scoring. Separation score should not be returning so many NaNs
-# def clust_path_score(df, score_lab = score_lab):
-#   path_contain_score = uniqueness(df, axis = 0, score_lab = score_lab)
-#   path_separate_score = uniqueness(df, axis = 1, score_lab = score_lab)
-#   path_overall_score = overall_paths(df, score_lab = score_lab)
-#   out_dict = {"PathContaining": path_contain_score,
-#                "PathSeparating": path_separate_score,
-#                "OverallPathway": path_overall_score,
-#                "PathContainingRedirected": redirect_score(path_contain_score),
-#                "PathSeparatingRedirected": redirect_score(path_separate_score),
-#                "OverallPathwayRedirected": redirect_score(path_overall_score)
-#   }
-#   return(out_dict)
+# TODO #16 test pathway scoring. Separation score should not be returning so many NaNs
+def clust_path_score(df, score_lab = "combined_score"):
+    """ Generate the three different pathway scores for a cluster results dataframe.
+        Args:
+            df (pd.DataFrame): DataFrame containing the cluster results.
+            score_lab (str, optional): Label for the score column. Defaults to "combined_score".
+        Returns:
+            dict: Dictionary containing the pathway scores with keys "PathContaining", 
+                  "PathSeparating", and "OverallPathway".
+    """
+    # Verify Types
+    if not isinstance(df, pd.DataFrame):
+        error_string = f"""df should be a pandas dataframe not {type(df)}"""
+        raise TypeError(error_string)
+    # Verify Columns Labels
+    if "pathway" not in df.columns:
+        error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_string)
+    if "ClusterNumber" not in df.columns:
+        error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_string)
+    # Verify score_lab is a valid column
+    if score_lab not in df.columns:
+        error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
+        raise ValueError(error_string)
+    path_contain_score = uniqueness(df, axis = 0, score_lab = score_lab)
+    path_separate_score = uniqueness(df, axis = 1, score_lab = score_lab)
+    path_overall_score = overall_paths(df, score_lab = score_lab)
+    out_dict = {"PathContaining": path_contain_score,
+               "PathSeparating": path_separate_score,
+               "OverallPathway": path_overall_score
+    }
+    return out_dict
