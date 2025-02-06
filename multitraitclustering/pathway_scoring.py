@@ -297,7 +297,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     positions = []
     col_pairs = []
     out_mat = mat.copy()
-    for _ in range(mat.shape[1]):
+    for i in range(mat.shape[1]):
         # Max number of iterations is the number of columns
         out_dict = assign_max_and_crop(out_mat)
         positions += out_dict["fixed_positions"]
@@ -311,6 +311,7 @@ def path_best_matches(df, score_lab = "combined_score"):
                  "col_pairs": col_pairs}
     return best_dict
 
+# TODO #16 test pathway scoring. Separation score should not be returning so many NaNs
 def clust_path_score(df, score_lab = "combined_score"):
     """ Generate the three different pathway scores for a cluster results dataframe.
         Args:

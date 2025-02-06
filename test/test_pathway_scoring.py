@@ -231,6 +231,67 @@ class TestPathwayScoring(unittest.TestCase):
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
         self.assertRaises(ValueError, ps.clust_path_score,
                           df = df_no_clusts)
+#         ## Test pathway scoring
+# * Identity matrix should score minimum.
+# * Permuted identity should also score minimum.
+# * Identity + Grey squares should score minimum + grey values * number of grey squares.
+# * Constant matrix should score maximum. 
+# nsq=6
+# grey_val = 0.5
+# n_grey = 2
+# # Create the test data
+# A0 = grey_val * np.ones((nsq,nsq))
+# A4 = np.eye(nsq)
+# A1 = A4.copy()
+# A1[:,0:3] = A4[:,1:4]
+# A1[:,3] = A4[:,0]
+# A1[:,4] = A4[:,5]
+# A1[:,5] = A4[:,4]
+# A2 = A1.copy()
+# A2[5,3] = grey_val
+# A2[4,4] = grey_val
+# def long_df_from_arr(A):
+#     nrows = A.shape[0]
+#     ncols = A.shape[1]
+#     long_dict = {}
+#     row = 0
+#     for i in range(nrows):
+#         for j in range(ncols):
+#             one_dict = {"pathway":"p%d"%i,
+#                         "ClusterNumber":"c%d"%j,
+#                         "combined_score":A[i,j]}
+#             long_dict[row] = one_dict
+#             row+=1
+#     long_df = pd.DataFrame(long_dict).T
+#     return(long_df)
+
+# # Set the expected values
+# e0 = 1
+# e1 = 0
+# e2 = grey_val * n_grey / (nsq**2)
+# e3 = 0
+# # Create a long form data_frame from matrix
+# dfs = [long_df_from_arr(A) for A in [A0, A1, A2, A4]]
+# expec = [e0, e1, e2, e3]
+# test = 0
+# for A in dfs:
+#     p_scores = ps.clust_path_score(A, score_lab="combined_score")
+#     print("Overall score ", p_scores["OverallPathway"])
+#     print("expected ", expec[test])
+#     test+=1
+
+# nsq=6
+# grey_val = 0.5
+# # Create the test data
+# A3 = np.eye(nsq)
+# A3[5,3] = grey_val
+# A3[4,4] = grey_val
+# A3[5,2] = grey_val
+# A3[5,0] = grey_val
+# A3[4,3] = grey_val
+# A3[4,5] = grey_val
+# p_scores = ps.clust_path_score(long_df_from_arr(A3), score_lab="combined_score")
+# p_scores
 
 if __name__ == '__main__':
     unittest.main()
