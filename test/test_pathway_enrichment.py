@@ -120,6 +120,8 @@ class TestPathwayEnrichment(unittest.TestCase):
         data_missing = [1, "pathway R-12345", 0.01, 2.5, 3.0 ]
         self.assertRaises(ValueError, pe.get_pathway_rows_from_data, data_missing, c_num_lab)
         self.assertRaises(ValueError, pe.get_pathway_rows_from_data, [], c_num_lab)
+        data_no_r = [1, "pathway_12345", 0.01, 2.5, 3.0, ["gene1", "gene2"], 0.05]
+        self.assertRaises(ValueError, pe.get_pathway_rows_from_data, data_no_r, c_num_lab)
 
     def test_fetch_enrichment(self):
         """
