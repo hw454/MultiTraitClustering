@@ -217,40 +217,40 @@ class TestPlottingFuncs(unittest.TestCase):
         })
         xlab = 'pathway'
         ylab = 'value'
-        group_lab = 'group'
+        grouplab = 'group'
         max_val = 30
         title = 'Pathway Analysis'
 
         # Call pathway_bars with valid parameters
-        chart = pc.pathway_bars(data, xlab, ylab, group_lab, max_val, title)
+        chart = pc.pathway_bars(data, xlab, ylab, grouplab, max_val, title)
 
         # Assert the type of the returned object
         self.assertTrue(isinstance(chart, alt.Chart))
 
         # Negative test cases
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data.to_numpy(), xlab, ylab, group_lab, max_val, title)
+            pc.pathway_bars(data.to_numpy(), xlab, ylab, grouplab, max_val, title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, 123, ylab, group_lab, max_val, title)
+            pc.pathway_bars(data, 123, ylab, grouplab, max_val, title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, xlab, 456, group_lab, max_val, title)
+            pc.pathway_bars(data, xlab, 456, grouplab, max_val, title)
 
         with self.assertRaises(TypeError):
             pc.pathway_bars(data, xlab, ylab, 789, max_val, title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, xlab, ylab, group_lab, 'abc', title)
+            pc.pathway_bars(data, xlab, ylab, grouplab, 'abc', title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, xlab, ylab, group_lab, max_val, 321)
+            pc.pathway_bars(data, xlab, ylab, grouplab, max_val, 321)
 
         with self.assertRaises(KeyError):
-            pc.pathway_bars(data, 'invalid_column', ylab, group_lab, max_val, title)
+            pc.pathway_bars(data, 'invalid_column', ylab, grouplab, max_val, title)
 
         with self.assertRaises(KeyError):
-            pc.pathway_bars(data, xlab, 'invalid_column', group_lab, max_val, title)
+            pc.pathway_bars(data, xlab, 'invalid_column', grouplab, max_val, title)
 
         with self.assertRaises(KeyError):
             pc.pathway_bars(data, xlab, ylab, 'invalid_column', max_val, title)

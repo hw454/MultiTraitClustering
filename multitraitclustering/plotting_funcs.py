@@ -114,9 +114,6 @@ def chart_clusters_multi(
         color_var (str): Label for the variable to group colors by.
         tooltip (list): List of labels for data to show when hovered.
         xcol (str, optional): Label for fixed x column. Defaults to first column in the data.
-        palette (list, optional): Color palette to use. Defaults to None.
-        clust_groups (list, optional): List of cluster labels, used to define the domain of 
-            the color scale. Defaults to None.
         col_list (list, optional): List of columns for the y-axis. Defaults to [].
 
     Returns:
@@ -134,14 +131,12 @@ def chart_clusters_multi(
         raise TypeError("Tooltip must be a list.")
     if not all(isinstance(item, str) for item in tooltip):
         raise TypeError("All items in tooltip must be strings.")
-    if palette is not None and not isinstance(palette, list):
-        raise TypeError("Palette must be a list.")
-    if clust_groups is not None and not isinstance(clust_groups, list):
-        raise TypeError("clust_groups must be a list")
     if not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not all(col in data.columns for col in col_list):
         raise KeyError("All items in col_list must be a column in data.")
+    if not all(col in data.columns for col in tooltip):
+        raise KeyError("All items in tooltip must be a column in data.")
 
     # Start of plotting code    
     if xcol is None:
@@ -282,14 +277,14 @@ def chart_cluster_pathway(
     )
     return chart + text
 
-def pathway_bars(df, xlab, ylab, grouplab, max_val, title): 
+def pathway_bars(df, xlab, ylab, group_lab, max_val, title): 
     """Generates a bar chart visualizing pathway data.
         Args:
             df (pd.DataFrame): DataFrame containing the data for the chart.
-                Must contain columns corresponding to xlab, ylab, and grouplab.
+                Must contain columns corresponding to xlab, ylab, and group_lab.
             xlab (str): Name of the column to use for the x-axis (pathway names).
             ylab (str): Name of the column to use for the y-axis (pathway values).
-            grouplab (str): Name of the column to use for grouping the bars into separate subplots.
+            group_lab (str): Name of the column to use for grouping the bars into separate subplots.
             max_val (float): Threshold value. Bars with y-values greater than or equal to this value will be colored green, otherwise steelblue.
             title (str): Title of the chart.
         Returns:
@@ -302,8 +297,8 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
         raise TypeError("xlab must be a string.")
     if not isinstance(ylab, str):
         raise TypeError("ylab must be a string.")
-    if not isinstance(grouplab, str):
-        raise TypeError("grouplab must be a string.")
+    if not isinstance(group_lab, str):
+        raise TypeError("group_lab must be a string.")
     if not isinstance(max_val, (int, float)):
         raise TypeError("max_val must be a number.")
     if not isinstance(title, str):
@@ -312,8 +307,8 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
         raise KeyError("xlab must be a column in df.")
     if ylab not in df.columns:
         raise KeyError("ylab must be a column in df.")
-    if grouplab not in df.columns:
-        raise KeyError("grouplab must be a column in df.")
+    if group_lab not in df.columns:
+        raise KeyError("group_lab must be a column in df.")
     chart = alt.Chart(df, title = title).mark_bar().encode(
         x=alt.X(xlab+':N', axis=alt.Axis(labels=False), title=None),
         y=ylab+':Q',
@@ -324,7 +319,7 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
             # the color is set to steelblue. 
             alt.value('steelblue') 
         ), 
-        column= alt.Column(grouplab+':N',
+        column= alt.Column(group_lab+':N',
                            header=alt.Header(labelAngle=-90,
                                              orient='top',
                                              labelOrient='top',
