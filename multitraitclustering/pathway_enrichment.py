@@ -112,6 +112,8 @@ def get_pathway_rows_from_data(data, c_num_lab):
     rank = data[0]
     pathway = data[1]
     path_full = pathway.split(" R-")
+    if len(path_full)<2:
+        raise ValueError("The pathway part of data should contain ` R-`.")
     pathway = path_full[0]
     path_id = "R-"+path_full[1]
     pval = data[2]

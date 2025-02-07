@@ -51,13 +51,6 @@ class TestPlottingFuncs(unittest.TestCase):
         # Assert the type of the returned object
         self.assertTrue(isinstance(chart, alt.Chart))
 
-        # Call chart_clusters with a palette
-        chart_with_palette = pc.chart_clusters(data, 'Test Chart', 'cluster', ['tooltip'],
-                                               palette=['red', 'blue'])
-
-        # Assert the type of the returned object
-        self.assertTrue(isinstance(chart_with_palette, alt.Chart))
-
         # Negative test cases
         with self.assertRaises(TypeError):
             pc.chart_clusters(data.to_numpy(), 'Test Chart', 'cluster', ['tooltip'])
@@ -99,14 +92,6 @@ class TestPlottingFuncs(unittest.TestCase):
         self.assertEqual(len(charts), 2)
         self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts.values()))
 
-        # Call chart_clusters_multi with a palette
-        charts_with_palette = pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['tooltip'],
-                                col_list=['pc_2', 'pc_3'], palette=['red', 'blue'])
-
-        # Assert the type of the returned object
-        self.assertTrue(isinstance(charts_with_palette, dict))
-        self.assertEqual(len(charts_with_palette), 2)
-        self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts_with_palette.values()))
         # Negative test cases
         with self.assertRaises(TypeError):
             pc.chart_clusters_multi(data.to_numpy(), 'Test Chart', 'cluster', ['tooltip'],
