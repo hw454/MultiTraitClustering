@@ -281,3 +281,23 @@ def chart_cluster_pathway(
         alt.Text(z_lab + ":Q", format=text_precision), color=alt.value("black")
     )
     return chart + text
+
+def pathway_bars(df, xlab, ylab, grouplab, max_val, title):   
+    chart = alt.Chart(df, title = title).mark_bar().encode(
+        x=alt.X(xlab+':N', axis=alt.Axis(labels=False), title=None),
+        y=ylab+':Q',
+        color=alt.condition( 
+            alt.datum[ylab] >= max_val,  # If the rating is less than the min it returns True, 
+            alt.value('green'),      # and the matching bars are set as green. 
+            # and if it does not satisfy the condition  
+            # the color is set to steelblue. 
+            alt.value('steelblue') 
+        ), 
+        column= alt.Column(grouplab+':N',
+                           header=alt.Header(labelAngle=-90,
+                                             orient='top',
+                                             labelOrient='top',
+                                             labelAlign='right'), 
+                                             title = None)
+    ).interactive()
+    return(chart)
