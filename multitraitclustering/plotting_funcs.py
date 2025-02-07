@@ -137,6 +137,8 @@ def chart_clusters_multi(
         raise TypeError("All items in tooltip must be strings.")
     if palette is not None and not isinstance(palette, list):
         raise TypeError("Palette must be a list.")
+    if palette is not None and clust_groups is None:
+        raise ValueError("Palette can not be used without clust_groups")
     if clust_groups is not None and not isinstance(clust_groups, list):
         raise TypeError("clust_groups must be a list")
     if col_list is not None and not isinstance(col_list, list):
@@ -270,6 +272,25 @@ def chart_cluster_pathway(
         alt.Chart: An Altair chart object representing cluster pathway heatmap.  This can be further
             modified or displayed using Altair's API.
     """
+    # Input Checks
+    if not isinstance(data_array, pd.DataFrame):
+        raise TypeError("data_array must be a pandas DataFrame.")
+    if not isinstance(x_lab, str):
+        raise TypeError("x_lab must be a string.")
+    if not isinstance(y_lab, str):
+        raise TypeError("y_lab must be a string.")
+    if not isinstance(z_lab, str):
+        raise TypeError("z_lab must be a string.")
+    if not isinstance(title_str, str):
+        raise TypeError("title_str must be a string.")
+    if not isinstance(text_precision, str):
+        raise TypeError("text_precision must be a string.")
+    if x_lab not in data_array.columns:
+        raise KeyError("x_lab must be a column in data_array.")
+    if y_lab not in data_array.columns:
+        raise KeyError("y_lab must be a column in data_array.")
+    if z_lab not in data_array.columns:
+        raise KeyError("z_lab must be a column in data_array.")
     # Convert this grid to columnar data expected by Altair
     title = alt.TitleParams(title_str, anchor="middle")
     chart = (
