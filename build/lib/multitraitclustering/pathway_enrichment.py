@@ -71,14 +71,14 @@ def get_pathway_rows_from_data(data, c_num_lab):
 
     Args:
         data (list): A list containing pathway data with the following elements:
-            - rank (int): The rank of the pathway.
+            - rank (int, or str): The rank of the pathway.
             - pathway (str): The name of the pathway.
             - pval (float): The p-value associated with the pathway.
             - OR (float): The odds ratio.
             - score (float): The combined score.
             - overlap_genes (list): A list of overlapping genes.
             - adjust_pval (float): The adjusted p-value.
-        c_num_lab (int): The cluster number label.
+        c_num_lab (int or str): The cluster number label.
 
     Returns:
         dict: A dictionary containing three dictionaries:
@@ -90,15 +90,11 @@ def get_pathway_rows_from_data(data, c_num_lab):
     # Check input types
     if not isinstance(data, list):
         raise TypeError(f"data should be a list, not {type(data)}")
-    if not isinstance(c_num_lab, int):
-        raise TypeError(f"c_num_lab should be an int, not {type(c_num_lab)}")
     # Check that data contains the necessary terms
     if len(data) != 7:
         error_string = """data should contain exactly 7 elements: rank, pathway,
             pval, OR, score, overlap_genes, adjust_pval"""
         raise ValueError(error_string)
-    if not isinstance(data[0], int):
-        raise TypeError(f"data[0] (rank) should be an int, not {type(data[0])}")
     if not isinstance(data[1], str):
         raise TypeError(f"data[1] (pathway) should be a str, not {type(data[1])}")
     if not isinstance(data[2], float):

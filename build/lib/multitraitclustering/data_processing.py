@@ -1,10 +1,31 @@
+"""
+Author: Hayley Wragg
+Created: 6th February 2025
+Description:
+    This module provides functions for processing and comparing clustering results.
+Functions:
+    `compare_results_list_to_external`(clust_df, external_df, external_lab):
+        Compare clustering results to an external method and return a dictionary
+        of DataFrames corresponding to each clustering method.
+    `centroid_distance`(cents, data, membership, metric="euc"):
+        Calculate the distance between points in a cluster and the centroid.
+    `calc_medoids`(data, data_dist, membership):
+        Calculate the coordinates of the medoids for each cluster.
+    `overlap_score`(comp_percent_df):
+        Compute overlap score from percentage overlaps between cluster pairings.
+    `overlap_pairs`(comp_percent_df, meth_lab, meth_sec_lab="paper"):
+        Find cluster labels for best match pairs between clustering methods.
+    `calc_per_from_comp`(comp_vals):
+        Calculate percentage overlap between clusters from the no. of points in the intersection.
+ """
+
+from itertools import product
+
 from scipy.spatial.distance import cosine
 import numpy as np
 import pandas as pd
-from itertools import product
 
 from multitraitclustering import data_setup as ds
-
 
 def compare_results_list_to_external(clust_df, external_df, external_lab):
     """Compare clustering results to an external method.
@@ -52,10 +73,8 @@ def compare_results_list_to_external(clust_df, external_df, external_lab):
         raise TypeError(error_string)
     # ValueErrors
     if external_lab not in external_df.columns:
-        error_string = """Input external_lab {lab} should be a column in
-        external_df. Options: {col_list}""".format(
-            lab=external_lab, col_list=str(external_df.columns)
-        )
+        error_string = f"""Input external_lab {external_lab} should be a column in
+            external_df. Options: {external_df.columns}"""
         raise ValueError(error_string)
     snps = clust_df.index
     external_snps = external_df.index
@@ -140,33 +159,25 @@ def centroid_distance(cents, data, membership, metric="euc"):
         raise ValueError(error_string)
     # Check the dimensions match
     if membership.shape[0] != data.shape[0]:
-        error_string = """Dimension mismatch. Membership has {mem_points}
-                        points, and needs {data_points},
-                        the number data points in data.""".format(
-            mem_points=str(membership.shape[0]), data_points=str(data.shape[0])
-        )
+        error_string = f"""Dimension mismatch. Membership has {membership.shape[0]}
+                        points, and needs {data.shape[0]},
+                        the number data points in data."""
         raise ValueError(error_string)
     if data.shape[1] != cents.shape[1]:
-        error_string = """Dimension mismatch. The cents have {cent_axes} axes,
-                        and needs {trait_axes} columns to match the data.
-                        """.format(
-            cent_axes=str(cents.shape[1]), trait_axes=str(data.shape[1])
-        )
+        error_string = f"""Dimension mismatch. The cents have {cents.shape[1]} axes,
+                        and needs {data.shape[1]} columns to match the data.
+                        """
         raise ValueError(error_string)
     # Check there is a centre for all clusters in membership.
     if membership.nunique() > cents.shape[0]:
-        error_string = """There are centres defined for {nclust} clusters
-                        but there are {clust_labs} cluster labels in the
-                        membership.""".format(
-            nclust=str(cents.shape[0]), clust_labs=str(membership.nunique())
-        )
+        error_string = f"""There are centres defined for {cents.shape[0]} clusters
+                        but there are {membership.nunique()} cluster labels in the
+                        membership."""
         raise ValueError(error_string)
     if not all(m in cents.index for m in membership.unique()):
-        error_string = """There are clusters in the membership list {mems},
-                        which do not have a corresponding centre in {cent_list}
-                        """.format(
-            mems=str(membership.unique()), cent_list=str(cents.index)
-        )
+        error_string = f"""There are clusters in the membership list {membership.unique()},
+                        which do not have a corresponding centre in {cents.index}
+                        """
         raise ValueError(error_string)
     distance_df = pd.DataFrame(
         index=membership.index, columns=["clust_dist", "clust_num"]
@@ -241,26 +252,17 @@ def calc_medoids(data, data_dist, membership):
         raise TypeError(error_string)
     # Check the dimensions match for data and dist
     if data.shape[0] != data_dist.shape[0]:
-        error_string = """The data dataframe has %d data points which
-                        does not match the %d data points in dist_df""" % (
-            data.shape[0],
-            data_dist.shape[0],
-        )
+        error_string = f"""The data dataframe has {data.shape[0]} data points which
+                        does not match the {data_dist.shape[0]} data points in dist_df"""
         raise ValueError(error_string)
     # Check the dimensions match for dist rows and columns
     if data_dist.shape[0] != data_dist.shape[1]:
-        error_string = """The dist dataframe has %d rows which does not
-                       match the %d columns""" % (
-            data_dist.shape[0],
-            data_dist.shape[1],
-        )
+        error_string = f"""The dist dataframe has {data_dist.shape[0]} rows which does not
+                       match the {data_dist.shape[1]} columns"""
         raise ValueError(error_string)
     if data.shape[0] != len(membership):
-        error_string = """The dist dataframe has %d rows which
-                        does not match the %d data points in membership""" % (
-            data_dist.shape[0],
-            len(membership),
-        )
+        error_string = f"""The dist dataframe has {data_dist.shape[0]} rows which does
+                        not match the {len(membership)} data points in membership"""
         raise ValueError(error_string)
 
     medoids_out = {}
@@ -298,8 +300,8 @@ def overlap_score(comp_percent_df):
             + str(type(comp_percent_df))
         raise TypeError(error_string)
     overlaps = np.amax(comp_percent_df, axis=1)
-    overlap_score = overlaps.mean()
-    return overlap_score
+    o_score = overlaps.mean()
+    return o_score
 
 
 def overlap_pairs(comp_percent_df, meth_lab, meth_sec_lab="paper"):

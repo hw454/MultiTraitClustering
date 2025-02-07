@@ -1,12 +1,60 @@
+"""
+Author: Hayley Wragg
+Created: 6th FEbruary 2025
+Description:
+    Unit tests for the data processing functions in the multitraitclustering package.
+Classes:
+    TestDataProcessing: Contains unit tests for various data processing functions.
+Methods:
+    test_compare_results_list_to_external: Tests comparison of cluster results to external results.
+    test_centroid_distance: Tests calculation of distances from each point to the centroid.
+    test_overlap_score: Tests calculation of overlap scores between clustering results.
+    test_overlap_pairs: Tests finding best matching pairs of clusters between clustering methods.
+    test_calc_per_from_comp: Tests calculation of percentage overlap from comparison values.
+    test_calc_medoids: Tests finding the medoid for each cluster.
+"""
+
+import random as rnd
+
 import unittest
 import pandas as pd
-import random as rnd
 
 from multitraitclustering import data_setup as ds
 from multitraitclustering import data_processing as dp
 
 
 class TestDataProcessing(unittest.TestCase):
+    """
+    TestDataProcessing is a unittest.TestCase class that contains several test methods.
+    
+    Validates the functionality of data processing functions in the dp module. 
+    The tests include:
+    1. test_compare_results_list_to_external: 
+        - Tests the comparison of clustering results to external clustering results.
+        - Validates the output type and structure.
+        - Includes negative checks for invalid input types and values.
+    2. test_centroid_distance: 
+        - Tests the calculation of the distance for each point to the centroid.
+        - Validates the output type, dimensions, and content.
+        - Includes negative checks for invalid input types and dimensions.
+    3. test_overlap_score: 
+        - Tests the computation of an overlap score from comparison values.
+        - Validates the output type.
+        - Includes a negative check for invalid input types.
+    4. test_overlap_pairs: 
+        - Tests the identification of pairs of cluster numbers with the best percentage
+        match between two clustering methods.
+        - Validates the output type and dimensions.
+        - Includes negative checks for invalid input types and labels.
+    5. test_calc_per_from_comp: 
+        - Tests the computation of the percentage overlap between clusters.
+        - Validates the output type.
+        - Includes a negative check for invalid input types.
+    6. test_calc_medoids: 
+        - Tests the identification of the medoid for each cluster.
+        - Validates the output type, dimensions, and completeness.
+        - Includes negative checks for invalid input types and dimensions.
+    """
 
     def test_compare_results_list_to_external(self):
         """comparison of clustering results to external clustering results."""
@@ -23,8 +71,8 @@ class TestDataProcessing(unittest.TestCase):
         mems_2 = [rnd.randint(1, nclusts + 3) for j in range(1, npnts + 1)]
         mems_3 = [rnd.randint(0, nclusts + 50) for j in range(1, npnts + 1)]
         external_df = pd.DataFrame(
-            index=data["eff_df"].index, 
-            data=membership, 
+            index=data["eff_df"].index,
+            data=membership,
             columns=[external_lab]
         )
         clust_df = pd.DataFrame(

@@ -311,7 +311,7 @@ def path_best_matches(df, score_lab = "combined_score"):
                  "col_pairs": col_pairs}
     return best_dict
 
-# TODO #16 test pathway scoring. Separation score should not be returning so many NaNs
+# TODO #17 test pathway scoring. Separation score should not be returning so many NaNs
 def clust_path_score(df, score_lab = "combined_score"):
     """ Generate the three different pathway scores for a cluster results dataframe.
         Args:
