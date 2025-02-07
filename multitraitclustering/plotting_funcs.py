@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 
 
-# TODO #7 Tests for chart_clusters
 def chart_clusters(
     data,
     title,
@@ -92,7 +91,6 @@ def chart_clusters(
     return chart
 
 
-# TODO #8 tests for chart_clusters_multi
 def chart_clusters_multi(
     data,
     title,
@@ -122,8 +120,28 @@ def chart_clusters_multi(
         col_list (list, optional): List of columns for the y-axis. Defaults to [].
 
     Returns:
-        dict: A dictionary where keys are column names from `col_list` and values are corresponding Altair chart objects.
+        dict: A dictionary where keys are column names from `col_list` and values are 
+        corresponding Altair chart objects.
     """
+    # Input checks
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError("Data must be a pandas DataFrame.")
+    if not isinstance(title, str):
+        raise TypeError("Title must be a string.")
+    if not isinstance(color_var, str):
+        raise TypeError("color_var must be a string.")
+    if not isinstance(tooltip, list):
+        raise TypeError("Tooltip must be a list.")
+    if not all(isinstance(item, str) for item in tooltip):
+        raise TypeError("All items in tooltip must be strings.")
+    if palette is not None and not isinstance(palette, list):
+        raise TypeError("Palette must be a list.")
+    if clust_groups is not None and not isinstance(clust_groups, list):
+        raise TypeError("clust_groups must be a list")
+    if not isinstance(col_list, list):
+        raise TypeError("col_list must be a list")
+
+    # Start of plotting code    
     if xcol is None:
         col1 = data.columns[0]
     else:
@@ -152,7 +170,6 @@ def chart_clusters_multi(
     return chart_dict
 
 
-# TODO #9 tests for chart_cluster_compare
 def chart_cluster_compare(
     data_array, xlabels, ylabels, x_lab, y_lab, z_lab, text_precision=".0f"
 ):
@@ -172,6 +189,28 @@ def chart_cluster_compare(
     Returns:
         alt.Chart: An Altair chart object representing the heatmap.
     """
+    if not isinstance(data_array, np.ndarray):
+        raise TypeError("data_array must be a numpy array.")
+    if not isinstance(xlabels, list):
+        raise TypeError("xlabels must be a list.")
+    if not isinstance(ylabels, list):
+        raise TypeError("ylabels must be a list.")
+    if not isinstance(x_lab, str):
+        raise TypeError("x_lab must be a string.")
+    if not isinstance(y_lab, str):
+        raise TypeError("y_lab must be a string.")
+    if not isinstance(z_lab, str):
+        raise TypeError("z_lab must be a string.")
+    if not isinstance(text_precision, str):
+        raise TypeError("text_precision must be a string.")
+    if len(ylabels) != data_array.shape[0]:
+        error_string = f"""Length of ylabels ({len(ylabels)}) must match no. of rows in
+            data_array ({data_array.shape[0]})."""
+        raise ValueError(error_string)
+    if len(xlabels) != data_array.shape[1]:
+        error_string = f"""Length of xlabels ({len(xlabels)}) must match no. of cols in
+            data_array ({data_array.shape[1]})."""
+        raise ValueError(error_string)
     # Convert this grid to columnar data expected by Altair
     ylen = data_array.shape[0]
     xlen = data_array.shape[1]

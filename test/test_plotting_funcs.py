@@ -116,9 +116,9 @@ class TestPlottingFuncs(unittest.TestCase):
             """
 
         # Create a sample data array
-        data_array = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]])
+        data_array = np.array([[0.1, 0.2, 0.3],[None, 2, 4], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9]])
         xlabels = ['X1', 'X2', 'X3']
-        ylabels = ['Y1', 'Y2', 'Y3']
+        ylabels = ['Y1', 'Y2', 'Y3', ' Y4']
         x_lab = 'x_cluster'
         y_lab = 'y_cluster'
         z_lab = 'overlap'
@@ -128,6 +128,25 @@ class TestPlottingFuncs(unittest.TestCase):
 
         # Assert the type of the returned object
         self.assertTrue(isinstance(chart, alt.LayerChart))
+
+        # Negative test cases
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_compare(data_array.tolist(), xlabels, ylabels, x_lab, y_lab, z_lab)
+
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_compare(data_array, 1, ylabels, x_lab, y_lab, z_lab)
+
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_compare(data_array, xlabels, 2, x_lab, y_lab, z_lab)
+
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_compare(data_array, xlabels, ylabels, 3, y_lab, z_lab)
+
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_compare(data_array, xlabels, ylabels, x_lab, 4, z_lab)
+
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_compare(data_array, xlabels, ylabels, x_lab, y_lab, 5)
 
     def test_chart_cluster_pathway(self):
         """Test the chart_cluster_pathway function.
@@ -153,5 +172,20 @@ class TestPlottingFuncs(unittest.TestCase):
         # Assert the type of the returned object
         self.assertTrue(isinstance(chart, alt.LayerChart))
 
+        # Negative test cases
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_pathway(data.to_numpy(), x_lab, y_lab, z_lab, title_str)
+
+        with self.assertRaises(KeyError):
+            pc.chart_cluster_pathway(data, 'invalid_column', y_lab, z_lab, title_str)
+
+        with self.assertRaises(KeyError):
+            pc.chart_cluster_pathway(data, x_lab, 'invalid_column', z_lab, title_str)
+
+        with self.assertRaises(KeyError):
+            pc.chart_cluster_pathway(data, x_lab, y_lab, 'invalid_column', title_str)
+
+        with self.assertRaises(TypeError):
+            pc.chart_cluster_pathway(data, x_lab, y_lab, z_lab, 123)
 if __name__ == '__main__':
     unittest.main()
