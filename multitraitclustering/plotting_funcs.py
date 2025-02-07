@@ -66,10 +66,10 @@ def chart_clusters(
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     chart = (
-            alt.Chart(data, title=title)
-            .mark_circle(size=60)
-            .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
-            .interactive()
+        alt.Chart(data, title=title)
+        .mark_circle(size=60)
+        .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
+        .interactive()
     )
     return chart
 
@@ -115,11 +115,11 @@ def chart_clusters_multi(
     if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not color_var in data.columns:
-        error_string = f"""The columns {color_var} is not in the data. 
+        error_string = f"""The columns {color_var} is not in the data.
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     if xcol is not None and not xcol in data.columns:
-        error_string = f"""The columns {xcol} is not in the data. 
+        error_string = f"""The columns {xcol} is not in the data.
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     if col_list is not None and not all(col in data.columns for col in col_list):
@@ -141,9 +141,9 @@ def chart_clusters_multi(
     chart_dict = {}
     for col2 in col_list:
         chart_dict[col2] = (
-                alt.Chart(data, title=title)
-                .mark_circle(size=60)
-                .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
+            alt.Chart(data, title=title)
+            .mark_circle(size=60)
+            .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
         )
     return chart_dict
 
@@ -198,8 +198,8 @@ def chart_cluster_compare(
     x_clust = {i: cn for i, cn in enumerate(xlabels)}
     y_clust = {j: cn for j, cn in enumerate(ylabels)}
     z = data_array
-    source = pd.DataFrame(dtype= str, 
-        data = {x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()}
+    source = pd.DataFrame(
+        dtype=str, data={x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()}
     )
     for i in range(0, xlen):
         source.loc[source[x_lab] == i, x_lab] = x_clust[i]
@@ -331,7 +331,7 @@ def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
                 # the color is set to steelblue.
                 alt.value("steelblue"),
             ),
-            column = alt.Column(
+            column=alt.Column(
                 group_lab + ":N",
                 header=alt.Header(
                     labelAngle=-90, orient="top", labelOrient="top", labelAlign="right"

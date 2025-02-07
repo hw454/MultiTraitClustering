@@ -3,9 +3,10 @@ Author: Hayley Wragg
 Created: 6th February 2025
 Description:
     This module provides a collection of functions for visualizing clustering results using Altair.
-    It includes functions for creating scatter plots of clusters, generating multiple scatter plots with a fixed x-axis,
-    comparing clustering methods using heatmaps, and visualizing cluster pathways.
-    The module relies on the Altair library for creating the visualizations and Pandas for data manipulation.
+    Includes functions for creating scatter plots of clusters, generating multiple scatter 
+    plots with a fixed x-axis, comparing clustering methods using heatmaps, and visualizing 
+    cluster pathways.
+    Module relies on Altair library to create visualizations and Pandas for data manipulation.
 """
 
 import altair as alt
@@ -97,9 +98,7 @@ def chart_clusters_multi(
     color_var,
     tooltip,
     xcol=None,
-    palette=None,
-    clust_groups=None,
-    col_list=[],
+    col_list=None,
 ):
     """Generates multiple scatter plots with a fixed x-axis and varying y-axes, colored by 
     cluster labels.
@@ -134,41 +133,25 @@ def chart_clusters_multi(
         raise TypeError("Tooltip must be a list.")
     if not all(isinstance(item, str) for item in tooltip):
         raise TypeError("All items in tooltip must be strings.")
-    if palette is not None and not isinstance(palette, list):
-        raise TypeError("Palette must be a list.")
-    if clust_groups is not None and not isinstance(clust_groups, list):
-        raise TypeError("clust_groups must be a list")
     if not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not all(col in data.columns for col in col_list):
         raise KeyError("All items in col_list must be a column in data.")
 
-    # Start of plotting code    
+    # Start of plotting code
     if xcol is None:
         col1 = data.columns[0]
     else:
         col1 = xcol
+    if col_list is None:
+        col_list = data.columns[1:]
     chart_dict = {}
     for col2 in col_list:
-        if palette is not None:
-            chart_dict[col2] = (
-                alt.Chart(data, title=title)
-                .mark_circle(size=60)
-                .encode(
-                    x=col1,
-                    y=col2,
-                    color=alt.Color(
-                        color_var, scale=alt.Scale(domain=clust_groups, range=palette)
-                    ),
-                    tooltip=tooltip,
-                )
-            )
-        else:
-            chart_dict[col2] = (
+        chart_dict[col2] = (
                 alt.Chart(data, title=title)
                 .mark_circle(size=60)
                 .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
-            )
+        )
     return chart_dict
 
 
@@ -282,18 +265,20 @@ def chart_cluster_pathway(
     )
     return chart + text
 
-def pathway_bars(df, xlab, ylab, grouplab, max_val, title): 
+def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
     """Generates a bar chart visualizing pathway data.
         Args:
             df (pd.DataFrame): DataFrame containing the data for the chart.
-                Must contain columns corresponding to xlab, ylab, and grouplab.
+                Must contain columns corresponding to xlab, ylab, and group_lab.
             xlab (str): Name of the column to use for the x-axis (pathway names).
             ylab (str): Name of the column to use for the y-axis (pathway values).
-            grouplab (str): Name of the column to use for grouping the bars into separate subplots.
-            max_val (float): Threshold value. Bars with y-values greater than or equal to this value will be colored green, otherwise steelblue.
+            group_lab (str): Name of the column to use for grouping the bars into separate subplots.
+            max_val (float): TMax value, y-values greater than or equal to this value will 
+                be colored green, otherwise steelblue.
             title (str): Title of the chart.
         Returns:
-            alt.Chart: An Altair bar chart object. The chart is interactive, allowing for zooming and panning.
+            alt.Chart: An Altair bar chart object. The chart is interactive, 
+                allowing for zooming and panning.
         """
     # Input checks
     if not isinstance(df, pd.DataFrame):
@@ -302,8 +287,8 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
         raise TypeError("xlab must be a string.")
     if not isinstance(ylab, str):
         raise TypeError("ylab must be a string.")
-    if not isinstance(grouplab, str):
-        raise TypeError("grouplab must be a string.")
+    if not isinstance(group_lab, str):
+        raise TypeError("group_lab must be a string.")
     if not isinstance(max_val, (int, float)):
         raise TypeError("max_val must be a number.")
     if not isinstance(title, str):
@@ -312,23 +297,23 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
         raise KeyError("xlab must be a column in df.")
     if ylab not in df.columns:
         raise KeyError("ylab must be a column in df.")
-    if grouplab not in df.columns:
-        raise KeyError("grouplab must be a column in df.")
+    if group_lab not in df.columns:
+        raise KeyError("group_lab must be a column in df.")
     chart = alt.Chart(df, title = title).mark_bar().encode(
         x=alt.X(xlab+':N', axis=alt.Axis(labels=False), title=None),
         y=ylab+':Q',
-        color=alt.condition( 
-            alt.datum[ylab] >= max_val,  # If the rating is less than the min it returns True, 
-            alt.value('green'),      # and the matching bars are set as green. 
-            # and if it does not satisfy the condition  
-            # the color is set to steelblue. 
-            alt.value('steelblue') 
-        ), 
-        column= alt.Column(grouplab+':N',
+        color=alt.condition(
+            alt.datum[ylab] >= max_val,  # If the rating is less than the min it returns True,
+            alt.value('green'),      # and the matching bars are set as green.
+            # and if it does not satisfy the condition
+            # the color is set to steelblue.
+            alt.value('steelblue')
+        ),
+        column= alt.Column(group_lab+':N',
                            header=alt.Header(labelAngle=-90,
                                              orient='top',
                                              labelOrient='top',
-                                             labelAlign='right'), 
+                                             labelAlign='right'),
                                              title = None)
     ).interactive()
-    return(chart)
+    return chart
