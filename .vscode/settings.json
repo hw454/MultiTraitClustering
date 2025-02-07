@@ -4,6 +4,7 @@
         "cnum",
         "Dataframe",
         "dsetup",
+        "expec",
         "forall",
         "Hayley",
         "initialisation",
@@ -18,6 +19,7 @@
         "Normalise",
         "normalised",
         "npnts",
+        "nterms",
         "pdist",
         "pointwise",
         "rtype"

@@ -48,7 +48,7 @@ class TestPathwayScoring(unittest.TestCase):
         """
         npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(npoints)]
+        pathways = [f"pathway_{i}" for i in range(npoints)]
         cnums = [random.randint(1, nclusts) for i in range(npoints)]
         scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
@@ -117,7 +117,7 @@ class TestPathwayScoring(unittest.TestCase):
         """
         npoints = 300
         nclusts = 6
-        pathways = ["pathway_%d"%i for i in range(npoints)]
+        pathways = [f"pathway_{i}" for i in range(npoints)]
         cnums = [random.randint(1, nclusts) for i in range(npoints)]
         scores = [random.random() for i in range(npoints)]
         df = pd.DataFrame(data = {"pathway": pathways,
@@ -135,12 +135,163 @@ class TestPathwayScoring(unittest.TestCase):
                           score_lab = "CombinedScore")
         # ValueError when `pathway` is not a column
         df_no_path = df.rename(columns={'pathway':'paths'})
-        self.assertRaises(ValueError, ps.uniqueness,
+        self.assertRaises(ValueError, ps.overall_paths,
                           df = df_no_path)
         # ValueError when `ClusterNumber` is not a column
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
-        self.assertRaises(ValueError, ps.uniqueness,
+        self.assertRaises(ValueError, ps.overall_paths,
                           df = df_no_clusts)
-     
+    def test_redirect_score(self):
+        """
+        test_redirect_score Makes low values high and vise versa.
+        """
+        # Check for int input
+        self.assertTrue(isinstance(ps.redirect_score(15), float))
+        # Check for float input
+        self.assertTrue(isinstance(ps.redirect_score(13.2), float))
+        # Check for "Nan" input
+        self.assertIsNone(ps.redirect_score("NaN"))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # Input is negative
+        self.assertRaises(ValueError, ps.redirect_score, score = -4)
+        # Input is an invalid string
+        self.assertRaises(ValueError, ps.redirect_score, score = "invalid")
+        # Input is the wrong type
+        self.assertRaises(TypeError, ps.redirect_score, score = np.zeros((3,2)))
+    def test_path_best_matches(self):
+        """
+        test_overall_paths get an overall pathway score for clusters
+        """
+        npoints = 300
+        nclusts = 6
+        pathways = [f"pathway_{i}" for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+                                  "ClusterNumber": cnums,
+                                  "combined_score": scores})
+        best_out = ps.path_best_matches(df)
+        # Check output is dict
+        self.assertTrue(isinstance(best_out, dict))
+        # Check types of the terms in the dict
+        self.assertTrue(isinstance(best_out["best_mat"], np.ndarray))
+        self.assertTrue(isinstance(best_out["row_positions"], list))
+        self.assertTrue(isinstance(best_out["col_pairs"], list))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.path_best_matches, df.to_numpy())
+        # ValueError if score_lab is not a valid label
+        self.assertRaises(ValueError, ps.path_best_matches, df,
+                          score_lab = "CombinedScore")
+        # ValueError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(ValueError, ps.path_best_matches,
+                          df = df_no_path)
+        # ValueError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(ValueError, ps.path_best_matches,
+                          df = df_no_clusts)
+    def test_clust_path_score(self):
+        """Tests the `clust_path_score` function in the pathway_scoring module.
+        This test verifies that the clust_path_score function correctly calculates
+        the pathway scores for given clusters. It checks the accuracy and correctness
+        of the scoring mechanism by comparing the output with expected results.
+        Raises:
+            AssertionError: If clust_path_Score fails the tests
+        """
+        npoints = 300
+        nclusts = 6
+        pathways = [f"pathway_{i}" for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+                                  "ClusterNumber": cnums,
+                                  "combined_score": scores})
+        score_out = ps.clust_path_score(df)
+        # Check output is dict
+        self.assertTrue(isinstance(score_out, dict))
+        # Check types of the terms in the dict
+        self.assertTrue(isinstance(score_out["PathContaining"], float))
+        self.assertTrue(isinstance(score_out["PathSeparating"], float))
+        self.assertTrue(isinstance(score_out["OverallPathway"], float))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.clust_path_score, df.to_numpy())
+        # ValueError if score_lab is not a valid label
+        self.assertRaises(ValueError, ps.clust_path_score, df,
+                          score_lab = "CombinedScore")
+        # ValueError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(ValueError, ps.clust_path_score,
+                          df = df_no_path)
+        # ValueError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(ValueError, ps.clust_path_score,
+                          df = df_no_clusts)
+#         ## Test pathway scoring
+# * Identity matrix should score minimum.
+# * Permuted identity should also score minimum.
+# * Identity + Grey squares should score minimum + grey values * number of grey squares.
+# * Constant matrix should score maximum.
+# nsq=6
+# grey_val = 0.5
+# n_grey = 2
+# # Create the test data
+# A0 = grey_val * np.ones((nsq,nsq))
+# A4 = np.eye(nsq)
+# A1 = A4.copy()
+# A1[:,0:3] = A4[:,1:4]
+# A1[:,3] = A4[:,0]
+# A1[:,4] = A4[:,5]
+# A1[:,5] = A4[:,4]
+# A2 = A1.copy()
+# A2[5,3] = grey_val
+# A2[4,4] = grey_val
+# def long_df_from_arr(A):
+#     nrows = A.shape[0]
+#     ncols = A.shape[1]
+#     long_dict = {}
+#     row = 0
+#     for i in range(nrows):
+#         for j in range(ncols):
+#             one_dict = {"pathway":"p%d"%i,
+#                         "ClusterNumber":"c%d"%j,
+#                         "combined_score":A[i,j]}
+#             long_dict[row] = one_dict
+#             row+=1
+#     long_df = pd.DataFrame(long_dict).T
+#     return(long_df)
+
+# # Set the expected values
+# e0 = 1
+# e1 = 0
+# e2 = grey_val * n_grey / (nsq**2)
+# e3 = 0
+# # Create a long form data_frame from matrix
+# dfs = [long_df_from_arr(A) for A in [A0, A1, A2, A4]]
+# expec = [e0, e1, e2, e3]
+# test = 0
+# for A in dfs:
+#     p_scores = ps.clust_path_score(A, score_lab="combined_score")
+#     print("Overall score ", p_scores["OverallPathway"])
+#     print("expected ", expec[test])
+#     test+=1
+
+# nsq=6
+# grey_val = 0.5
+# # Create the test data
+# A3 = np.eye(nsq)
+# A3[5,3] = grey_val
+# A3[4,4] = grey_val
+# A3[5,2] = grey_val
+# A3[5,0] = grey_val
+# A3[4,3] = grey_val
+# A3[4,5] = grey_val
+# p_scores = ps.clust_path_score(long_df_from_arr(A3), score_lab="combined_score")
+# p_scores
+
 if __name__ == '__main__':
     unittest.main()
