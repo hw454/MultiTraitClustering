@@ -115,9 +115,6 @@ def chart_clusters_multi(
         color_var (str): Label for the variable to group colors by.
         tooltip (list): List of labels for data to show when hovered.
         xcol (str, optional): Label for fixed x column. Defaults to first column in the data.
-        palette (list, optional): Color palette to use. Defaults to None.
-        clust_groups (list, optional): List of cluster labels, used to define the domain of
-            the color scale. Defaults to None.
         col_list (list, optional): List of columns for the y-axis. Defaults to [].
 
     Returns:
@@ -135,12 +132,6 @@ def chart_clusters_multi(
         raise TypeError("Tooltip must be a list.")
     if not all(isinstance(item, str) for item in tooltip):
         raise TypeError("All items in tooltip must be strings.")
-    if palette is not None and not isinstance(palette, list):
-        raise TypeError("Palette must be a list.")
-    if palette is not None and clust_groups is None:
-        raise ValueError("Palette can not be used without clust_groups")
-    if clust_groups is not None and not isinstance(clust_groups, list):
-        raise TypeError("clust_groups must be a list")
     if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not all(col in data.columns for col in col_list):
@@ -155,25 +146,11 @@ def chart_clusters_multi(
         col_list = data.columns[1:]
     chart_dict = {}
     for col2 in col_list:
-        if palette is not None:
-            chart_dict[col2] = (
-                alt.Chart(data, title=title)
-                .mark_circle(size=60)
-                .encode(
-                    x=col1,
-                    y=col2,
-                    color=alt.Color(
-                        color_var, scale=alt.Scale(domain=clust_groups, range=palette)
-                    ),
-                    tooltip=tooltip,
-                )
-            )
-        else:
-            chart_dict[col2] = (
+        chart_dict[col2] = (
                 alt.Chart(data, title=title)
                 .mark_circle(size=60)
                 .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
-            )
+        )
     return chart_dict
 
 

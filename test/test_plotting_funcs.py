@@ -89,7 +89,6 @@ class TestPlottingFuncs(unittest.TestCase):
             'cluster': ['A', 'B', 'A', 'B', 'A'],
             'tooltip': ['info1', 'info2', 'info3', 'info4', 'info5']
         })
-        clust_groups = [data.cluster[0:2], data.cluster[2:]]
 
         # Call chart_clusters_multi with valid parameters
         charts = pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['tooltip'],
@@ -100,16 +99,6 @@ class TestPlottingFuncs(unittest.TestCase):
         self.assertEqual(len(charts), 2)
         self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts.values()))
 
-        # Call chart_clusters_multi with a palette
-        charts_with_palette = pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['tooltip'],
-                                col_list=['pc_2', 'pc_3'], 
-                                clust_groups= clust_groups,
-                                palette=['red', 'blue'])
-
-        # Assert the type of the returned object
-        self.assertTrue(isinstance(charts_with_palette, dict))
-        self.assertEqual(len(charts_with_palette), 2)
-        self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts_with_palette.values()))
         # Negative test cases
         with self.assertRaises(ValueError):
             pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['tooltip'],
