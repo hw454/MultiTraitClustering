@@ -3,9 +3,10 @@ Author: Hayley Wragg
 Created: 6th February 2025
 Description:
     This module provides a collection of functions for visualizing clustering results using Altair.
-    It includes functions for creating scatter plots of clusters, generating multiple scatter plots with a fixed x-axis,
-    comparing clustering methods using heatmaps, and visualizing cluster pathways.
-    The module relies on the Altair library for creating the visualizations and Pandas for data manipulation.
+    Includes functions for creating scatter plots of clusters, generating multiple scatter 
+    plots with a fixed x-axis, comparing clustering methods using heatmaps, 
+    and visualizing cluster pathways.
+    Module relies on Altair library to create visualizations and Pandas for data manipulation.
 """
 
 import altair as alt
@@ -101,11 +102,11 @@ def chart_clusters_multi(
     clust_groups=None,
     col_list=[],
 ):
-    """Generates multiple scatter plots with a fixed x-axis and varying y-axes, colored by 
+    """Generates multiple scatter plots with a fixed x-axis and varying y-axes, colored by
     cluster labels.
 
-    This function iterates through a list of columns, creating a scatter plot for each column 
-    against a fixed x-axis. The plots are colored according to a specified variable, 
+    This function iterates through a list of columns, creating a scatter plot for each column
+    against a fixed x-axis. The plots are colored according to a specified variable,
     typically cluster assignments.
 
     Args:
@@ -115,12 +116,12 @@ def chart_clusters_multi(
         tooltip (list): List of labels for data to show when hovered.
         xcol (str, optional): Label for fixed x column. Defaults to first column in the data.
         palette (list, optional): Color palette to use. Defaults to None.
-        clust_groups (list, optional): List of cluster labels, used to define the domain of 
+        clust_groups (list, optional): List of cluster labels, used to define the domain of
             the color scale. Defaults to None.
         col_list (list, optional): List of columns for the y-axis. Defaults to [].
 
     Returns:
-        dict: A dictionary where keys are column names from `col_list` and values are 
+        dict: A dictionary where keys are column names from `col_list` and values are
         corresponding Altair chart objects.
     """
     # Input checks
@@ -143,7 +144,7 @@ def chart_clusters_multi(
     if not all(col in data.columns for col in col_list):
         raise KeyError("All items in col_list must be a column in data.")
 
-    # Start of plotting code    
+    # Start of plotting code
     if xcol is None:
         col1 = data.columns[0]
     else:
@@ -191,6 +192,7 @@ def chart_cluster_compare(
     Returns:
         alt.Chart: An Altair chart object representing the heatmap.
     """
+    # Input Checks
     if not isinstance(data_array, np.ndarray):
         raise TypeError("data_array must be a numpy array.")
     if not isinstance(xlabels, list):
@@ -213,6 +215,7 @@ def chart_cluster_compare(
         error_string = f"""Length of xlabels ({len(xlabels)}) must match no. of cols in
             data_array ({data_array.shape[1]})."""
         raise ValueError(error_string)
+    # Structure the plotting data
     # Convert this grid to columnar data expected by Altair
     ylen = data_array.shape[0]
     xlen = data_array.shape[1]
@@ -221,11 +224,11 @@ def chart_cluster_compare(
     y_clust = {int(np.where(ylabels == cn)[0]): cn for cn in ylabels}
     z = data_array
     source = pd.DataFrame({x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()})
-    print(x_clust)
     for i in range(0, xlen):
         source.loc[source[x_lab] == i, x_lab] = x_clust[i]
     for j in range(0, ylen):
         source.loc[source[y_lab] == j, y_lab] = y_clust[j]
+    # Plotting
     chart = (
         alt.Chart(source)
         .mark_rect()
@@ -246,7 +249,7 @@ def chart_cluster_compare(
 
 
 def chart_cluster_pathway(
-        data_array, x_lab, y_lab, z_lab, title_str, text_precision=".0f"
+    data_array, x_lab, y_lab, z_lab, title_str, text_precision=".0f"
 ):
     """Generates a heatmap-like chart using Altair to visualize a cluster pathway.
     The chart displays the relationship between three variables (x, y, and z) from the input array.
@@ -282,19 +285,23 @@ def chart_cluster_pathway(
     )
     return chart + text
 
-def pathway_bars(df, xlab, ylab, grouplab, max_val, title): 
+
+def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
     """Generates a bar chart visualizing pathway data.
-        Args:
-            df (pd.DataFrame): DataFrame containing the data for the chart.
-                Must contain columns corresponding to xlab, ylab, and grouplab.
-            xlab (str): Name of the column to use for the x-axis (pathway names).
-            ylab (str): Name of the column to use for the y-axis (pathway values).
-            grouplab (str): Name of the column to use for grouping the bars into separate subplots.
-            max_val (float): Threshold value. Bars with y-values greater than or equal to this value will be colored green, otherwise steelblue.
-            title (str): Title of the chart.
-        Returns:
-            alt.Chart: An Altair bar chart object. The chart is interactive, allowing for zooming and panning.
-        """
+    Args:
+        df (pd.DataFrame): DataFrame containing the data for the chart.
+            Must contain columns corresponding to xlab, ylab, and group_lab.
+        xlab (str): Name of the column to use for the x-axis (pathway names).
+        ylab (str): Name of the column to use for the y-axis (pathway values).
+        group_lab (str): Name of the column to use for grouping the bars into
+            separate subplots.
+        max_val (float): Max value, y-vals greater than or equal to this value
+            will be colored green.
+        title (str): Title of the chart.
+    Returns:
+        alt.Chart: An Altair bar chart object. The chart is interactive, allowing
+            for zooming and panning.
+    """
     # Input checks
     if not isinstance(df, pd.DataFrame):
         raise TypeError("df must be a pandas DataFrame.")
@@ -302,8 +309,8 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
         raise TypeError("xlab must be a string.")
     if not isinstance(ylab, str):
         raise TypeError("ylab must be a string.")
-    if not isinstance(grouplab, str):
-        raise TypeError("grouplab must be a string.")
+    if not isinstance(group_lab, str):
+        raise TypeError("group_lab must be a string.")
     if not isinstance(max_val, (int, float)):
         raise TypeError("max_val must be a number.")
     if not isinstance(title, str):
@@ -312,23 +319,30 @@ def pathway_bars(df, xlab, ylab, grouplab, max_val, title):
         raise KeyError("xlab must be a column in df.")
     if ylab not in df.columns:
         raise KeyError("ylab must be a column in df.")
-    if grouplab not in df.columns:
-        raise KeyError("grouplab must be a column in df.")
-    chart = alt.Chart(df, title = title).mark_bar().encode(
-        x=alt.X(xlab+':N', axis=alt.Axis(labels=False), title=None),
-        y=ylab+':Q',
-        color=alt.condition( 
-            alt.datum[ylab] >= max_val,  # If the rating is less than the min it returns True, 
-            alt.value('green'),      # and the matching bars are set as green. 
-            # and if it does not satisfy the condition  
-            # the color is set to steelblue. 
-            alt.value('steelblue') 
-        ), 
-        column= alt.Column(grouplab+':N',
-                           header=alt.Header(labelAngle=-90,
-                                             orient='top',
-                                             labelOrient='top',
-                                             labelAlign='right'), 
-                                             title = None)
-    ).interactive()
-    return(chart)
+    if group_lab not in df.columns:
+        raise KeyError("group_lab must be a column in df.")
+    chart = (
+        alt.Chart(df, title=title)
+        .mark_bar()
+        .encode(
+            x=alt.X(xlab + ":N", axis=alt.Axis(labels=False), title=None),
+            y=ylab + ":Q",
+            color=alt.condition(
+                alt.datum[ylab]
+                >= max_val,  # If the rating is less than the min it returns True,
+                alt.value("green"),  # and the matching bars are set as green.
+                # and if it does not satisfy the condition
+                # the color is set to steelblue.
+                alt.value("steelblue"),
+            ),
+            column = alt.Column(
+                group_lab + ":N",
+                header=alt.Header(
+                    labelAngle=-90, orient="top", labelOrient="top", labelAlign="right"
+                ),
+                title=None,
+            ),
+        )
+        .interactive()
+    )
+    return chart

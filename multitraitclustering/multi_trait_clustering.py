@@ -1,3 +1,15 @@
+"""
+Author: Hayley Wragg
+Created: 10th December 2024
+Description:
+    This module provides functions for performing multi-trait clustering analysis.
+    It includes functions for:
+    - Calculating the Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC)
+        for evaluating clustering results.
+    - Applying various clustering methods to association data.
+    - Generating descriptive strings for clustering methods based on their parameters.
+    """
+
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
@@ -8,7 +20,6 @@ from multitraitclustering import data_setup as dsetup
 from multitraitclustering import clustering_methods as methods
 
 # TODO #4 create a function which loads the data and runs the clustering methods in one call
-# TODO #3 create scatter plots in clustering function
 # TODO #2 save results and plots from clustering
 
 def method_string(meth_str, alg_str, dist_str, num):
@@ -180,10 +191,8 @@ def cluster_all_methods(exp_df, assoc_df):
             but got """ + str(type(assoc_df))
         raise TypeError(error_string)
     if assoc_df.shape[0] != exp_df.shape[0]:
-        error_string = """no. of points in assoc_df is {apoints} mismatch with
-                      {epoints} in eff_df""".format(
-            apoints=assoc_df.shape[0], epoints=exp_df.shape[0]
-        )
+        error_string = f"""no. of points in assoc_df is {assoc_df.shape[0]} mismatch with
+                      {exp_df.shape[0]} in eff_df"""
         raise ValueError(error_string)
     # Initialise results df
     res_df = exp_df.merge(assoc_df,
@@ -367,7 +376,7 @@ def cluster_all_methods(exp_df, assoc_df):
     meth_str = "DBSCAN"
     min_s = 4
     eps = 0.5
-    meth_iter_str = meth_str + "%d" % (eps * 100)
+    meth_iter_str = meth_str +  f"{int(eps * 100)}"
     method_str = method_string(meth_iter_str, db_alg, dist_met, min_s)
     db_cos_05 = methods.dbscan(
         assoc_df,
@@ -386,7 +395,7 @@ def cluster_all_methods(exp_df, assoc_df):
     meth_str = "DBSCAN"
     min_s = 4
     eps = 0.6
-    meth_iter_str = meth_str + "%d" % (eps * 100)
+    meth_iter_str = meth_str +  f"{int(eps * 100)}"
     method_str = method_string(meth_iter_str, db_alg, dist_met, min_s)
     db_cos_05 = methods.dbscan(
         assoc_df,
@@ -405,7 +414,7 @@ def cluster_all_methods(exp_df, assoc_df):
     meth_str = "DBSCAN"
     min_s = 4
     eps = 0.7
-    meth_iter_str = meth_str + "%d" % (eps * 100)
+    meth_iter_str = meth_str +  f"{int(eps * 100)}"
     method_str = method_string(meth_iter_str, db_alg, dist_met, min_s)
     db_cos_05 = methods.dbscan(
         assoc_df,
@@ -458,7 +467,7 @@ def cluster_all_methods(exp_df, assoc_df):
     dist_met = "CosineDistance"
     meth_str = "Birch"
     method_str = method_string(
-        meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
+        meth_str +  f"{int(thresh * 100)}", "", dist_met, branch_fac
     )
     bir_cos_025 = methods.birch(
         assoc_df,
@@ -476,7 +485,7 @@ def cluster_all_methods(exp_df, assoc_df):
     branch_fac = 50
     dist_met = "CosineDistance"
     method_str = method_string(
-        meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
+        meth_str +  f"{int(thresh * 100)}", "", dist_met, branch_fac
     )
     bir_cos_125 = methods.birch(
         assoc_df,
@@ -494,7 +503,7 @@ def cluster_all_methods(exp_df, assoc_df):
     branch_fac = 50
     dist_met = "CosineDistance"
     method_str = method_string(
-        meth_str + "%d" % (100 * thresh), "", dist_met, branch_fac
+        meth_str + f"{int(thresh * 100)}", "", dist_met, branch_fac
     )
     bir_cos_225 = methods.birch(
         assoc_df,
@@ -512,7 +521,7 @@ def cluster_all_methods(exp_df, assoc_df):
     batch_size = 30
     dist_met = "CosineDistance"
     meth_str = "MiniBatchKmeans"
-    meth_iter_str = meth_str + "%d" % (batch_size)
+    meth_iter_str = meth_str + str(batch_size)
     method_str = method_string(meth_iter_str, "", dist_met, nclust)
     mini_4 = methods.kmeans_minibatch(
         assoc_df,
@@ -529,7 +538,7 @@ def cluster_all_methods(exp_df, assoc_df):
     nclust = 6
     batch_size = 30
     dist_met = "CosineDistance"
-    meth_iter_str = meth_str + "%d" % (batch_size)
+    meth_iter_str = meth_str + str(batch_size)
     method_str = method_string(meth_iter_str, "", dist_met, nclust)
     mini_6 = methods.kmeans_minibatch(
         assoc_df,
@@ -552,10 +561,10 @@ def cluster_all_methods(exp_df, assoc_df):
     diff_b = set(clust_res_df.columns).difference(set(clust_dict.keys()))
     # Check that the results have matching labels
     if not set(clust_dict.keys()) == set(clust_res_df.columns):
-        error_string = """keys between the clustering method parameter labels
+        error_string = f"""keys between the clustering method parameter labels
             and clustering results do not match. Parameter keys not in
-            cluster results: {diffA}, and Results labels not in
-            parameter keys: {diffB}""".format(diffA=diff_a, diffB=diff_b)
+            cluster results: {diff_a}, and Results labels not in
+            parameter keys: {diff_b}"""
         raise ValueError(error_string)
 
     out_dict = {"clust_pars_dict": clust_dict, "clust_results": clust_res_df}

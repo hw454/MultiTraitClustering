@@ -109,7 +109,7 @@ class TestPathwayEnrichment(unittest.TestCase):
         c_num_lab = 1
         result = pe.get_pathway_rows_from_data(data, c_num_lab)
         self.assertTrue(isinstance(result, dict))
-        data_extra =  [1, "pathway R-12345", 0.01, 2.5, 3.0, ["gene1", "gene2"], 0.05, "extra", "more"]
+        data_extra =  [1, "R-12345", 0.01, 2.5, 3.0, ["gene1", "gene2"], 0.05, "extra", "more"]
         result_extra = pe.get_pathway_rows_from_data(data_extra, c_num_lab)
         self.assertTrue(isinstance(result_extra, dict))
         self.assertIn("or_row", result)
