@@ -140,6 +140,8 @@ def chart_clusters_multi(
         raise TypeError("clust_groups must be a list")
     if not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
+    if not all(col in data.columns for col in col_list):
+        raise KeyError("All items in col_list must be a column in data.")
 
     # Start of plotting code    
     if xcol is None:
