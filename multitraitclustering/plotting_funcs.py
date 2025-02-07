@@ -282,7 +282,38 @@ def chart_cluster_pathway(
     )
     return chart + text
 
-def pathway_bars(df, xlab, ylab, grouplab, max_val, title):   
+def pathway_bars(df, xlab, ylab, grouplab, max_val, title): 
+    """Generates a bar chart visualizing pathway data.
+        Args:
+            df (pd.DataFrame): DataFrame containing the data for the chart.
+                Must contain columns corresponding to xlab, ylab, and grouplab.
+            xlab (str): Name of the column to use for the x-axis (pathway names).
+            ylab (str): Name of the column to use for the y-axis (pathway values).
+            grouplab (str): Name of the column to use for grouping the bars into separate subplots.
+            max_val (float): Threshold value. Bars with y-values greater than or equal to this value will be colored green, otherwise steelblue.
+            title (str): Title of the chart.
+        Returns:
+            alt.Chart: An Altair bar chart object. The chart is interactive, allowing for zooming and panning.
+        """
+    # Input checks
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame.")
+    if not isinstance(xlab, str):
+        raise TypeError("xlab must be a string.")
+    if not isinstance(ylab, str):
+        raise TypeError("ylab must be a string.")
+    if not isinstance(grouplab, str):
+        raise TypeError("grouplab must be a string.")
+    if not isinstance(max_val, (int, float)):
+        raise TypeError("max_val must be a number.")
+    if not isinstance(title, str):
+        raise TypeError("title must be a string.")
+    if xlab not in df.columns:
+        raise KeyError("xlab must be a column in df.")
+    if ylab not in df.columns:
+        raise KeyError("ylab must be a column in df.")
+    if grouplab not in df.columns:
+        raise KeyError("grouplab must be a column in df.")
     chart = alt.Chart(df, title = title).mark_bar().encode(
         x=alt.X(xlab+':N', axis=alt.Axis(labels=False), title=None),
         y=ylab+':Q',
