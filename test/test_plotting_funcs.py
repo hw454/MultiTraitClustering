@@ -107,7 +107,22 @@ class TestPlottingFuncs(unittest.TestCase):
         self.assertTrue(isinstance(charts_with_palette, dict))
         self.assertEqual(len(charts_with_palette), 2)
         self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts_with_palette.values()))
+        # Negative test cases
+        with self.assertRaises(TypeError):
+            pc.chart_clusters_multi(data.to_numpy(), 'Test Chart', 'cluster', ['tooltip'],
+                         col_list=['pc_2', 'pc_3'])
 
+        with self.assertRaises(KeyError):
+            pc.chart_clusters_multi(data, 'Test Chart', 'invalid_column', ['tooltip'],
+                         col_list=['pc_2', 'pc_3'])
+
+        with self.assertRaises(KeyError):
+            pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['invalid_tooltip'],
+                         col_list=['pc_2', 'pc_3'])
+
+        with self.assertRaises(KeyError):
+            pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['tooltip'],
+                         col_list=['invalid_column'])
     def test_chart_cluster_compare(self):
         """Test the chart_cluster_compare function.
             This test case creates a sample data array and calls the chart_cluster_compare

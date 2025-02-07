@@ -1,4 +1,23 @@
-# TODO #6 cluster_methods module docstring
+"""
+Author: Hayley Wragg
+Created: 7th February 2025
+Description:
+    This module implements various clustering methods for multi-trait clustering analysis.
+    It includes functions for:
+    - K-means clustering
+    - K-medoids clustering
+    - DBSCAN clustering
+    - Gaussian Mixture Model (GMM) clustering
+    - Birch clustering
+    - Mini-batch K-means clustering
+    Each function takes association data, distance data, and a results dataframe as input,
+    performs the specified clustering algorithm, and returns a dictionary containing the
+    updated results dataframe with cluster assignments and a dictionary of clustering parameters.
+    The module also includes extensive input validation to ensure data integrity and
+    parameter correctness. It leverages helper functions from the `checks`, `data_processing`,
+    and `multi_trait_clustering` submodules for data validation, distance calculations,
+    and string formatting.
+"""
 
 import pandas as pd
 import numpy as np
