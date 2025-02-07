@@ -100,7 +100,7 @@ def chart_clusters_multi(
     xcol=None,
     palette=None,
     clust_groups=None,
-    col_list=[],
+    col_list=None,
 ):
     """Generates multiple scatter plots with a fixed x-axis and varying y-axes, colored by
     cluster labels.
@@ -139,7 +139,7 @@ def chart_clusters_multi(
         raise TypeError("Palette must be a list.")
     if clust_groups is not None and not isinstance(clust_groups, list):
         raise TypeError("clust_groups must be a list")
-    if not isinstance(col_list, list):
+    if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not all(col in data.columns for col in col_list):
         raise KeyError("All items in col_list must be a column in data.")
@@ -149,6 +149,8 @@ def chart_clusters_multi(
         col1 = data.columns[0]
     else:
         col1 = xcol
+    if col_list is None:
+        col_list = data.columns[1:]
     chart_dict = {}
     for col2 in col_list:
         if palette is not None:
