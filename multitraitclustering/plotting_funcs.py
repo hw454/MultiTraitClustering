@@ -55,10 +55,16 @@ def chart_clusters(
         raise TypeError("col1 must be a string")
     if not isinstance(col2, str):
         raise TypeError("col2 must be a string")
+    if color_var not in data.columns:
+        raise KeyError("color_var must be a column in data.")
     if col1 not in data.columns:
         raise KeyError("col1 must be a column in data.")
     if col2 not in data.columns:
         raise KeyError("col2 must be a column in data.")
+    if not all(col in data.columns for col in tooltip):
+        error_string = f"""All items in tooltip must be a column in data.
+            Available columns: {data.columns}"""
+        raise KeyError(error_string)
     chart = (
             alt.Chart(data, title=title)
             .mark_circle(size=60)
@@ -108,12 +114,20 @@ def chart_clusters_multi(
         raise TypeError("All items in tooltip must be strings.")
     if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
-    if not xcol in data.columns:
+    if not color_var in data.columns:
+        error_string = f"""The columns {color_var} is not in the data. 
+            Available columns: {data.columns}"""
+        raise KeyError(error_string)
+    if xcol is not None and not xcol in data.columns:
         error_string = f"""The columns {xcol} is not in the data. 
             Available columns: {data.columns}"""
         raise KeyError(error_string)
-    if not all(col in data.columns for col in col_list):
+    if col_list is not None and not all(col in data.columns for col in col_list):
         error_string = f"""All items in col_list must be a column in data.
+            Available columns: {data.columns}"""
+        raise KeyError(error_string)
+    if not all(col in data.columns for col in tooltip):
+        error_string = f"""All items in tooltip must be a column in data.
             Available columns: {data.columns}"""
         raise KeyError(error_string)
 
@@ -181,10 +195,12 @@ def chart_cluster_compare(
     ylen = data_array.shape[0]
     xlen = data_array.shape[1]
     x, y = np.meshgrid(range(0, xlen), range(0, ylen))
-    x_clust = {int(np.where(xlabels == cn)[0]): cn for cn in xlabels}
-    y_clust = {int(np.where(ylabels == cn)[0]): cn for cn in ylabels}
+    x_clust = {i: cn for i, cn in enumerate(xlabels)}
+    y_clust = {j: cn for j, cn in enumerate(ylabels)}
     z = data_array
-    source = pd.DataFrame({x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()})
+    source = pd.DataFrame(dtype= str, 
+        data = {x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()}
+    )
     for i in range(0, xlen):
         source.loc[source[x_lab] == i, x_lab] = x_clust[i]
     for j in range(0, ylen):
