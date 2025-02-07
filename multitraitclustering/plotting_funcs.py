@@ -108,8 +108,14 @@ def chart_clusters_multi(
         raise TypeError("All items in tooltip must be strings.")
     if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
+    if not xcol in data.columns:
+        error_string = f"""The columns {xcol} is not in the data. 
+            Available columns: {data.columns}"""
+        raise KeyError(error_string)
     if not all(col in data.columns for col in col_list):
-        raise KeyError("All items in col_list must be a column in data.")
+        error_string = f"""All items in col_list must be a column in data.
+            Available columns: {data.columns}"""
+        raise KeyError(error_string)
 
     # Start of plotting code
     if xcol is None:
