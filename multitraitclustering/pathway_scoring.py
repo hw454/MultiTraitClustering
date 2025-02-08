@@ -6,6 +6,7 @@ Created: 5th February 2025
 """
 import numpy as np
 import pandas as pd
+import operator
 
 def ssd(a_mat, b_mat):
     """
@@ -202,7 +203,11 @@ def overall_paths(df, score_lab = "combined_score"):
     mat = np.nan_to_num(df_wide.to_numpy())
     # Compute the best match matrix and get the corresponding indexes
     best_mat_out= path_best_matches(df, score_lab=score_lab)
-    crop_mat = best_mat_out["best_mat"]
+    crop_df = best_mat_out["best_df"]
+    crop_mat = pd.pivot(crop_df,
+                        columns = ["ClusterNumber"],
+                        index = 'pathway',
+                        values = score_lab).to_numpy()
     rows = best_mat_out["row_positions"]
     cols = best_mat_out["col_pairs"]
     # Compute the overall score using the best match matrix
@@ -292,8 +297,6 @@ def path_best_matches(df, score_lab = "combined_score"):
    
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
-    print(mat.shape)
-    print(df.ClusterNumber.unique())
     # Get the row number for the maximum in each column
     # For any repeated row numbers get the row number of the second highest
     # Repeat until square matrix (Cropped matrix)
