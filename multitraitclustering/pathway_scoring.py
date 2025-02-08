@@ -17,7 +17,7 @@ def ssd(a_mat, b_mat):
         b_mat (np.ndarray): second matrix of scores, with the same structure as a_mat.
 
     Returns:
-        float: The sum of absolute differences between the elements of the two matrices, divided by the total number of elements.
+        float: Pointwise sum of absolute difference between matrices, divided by no. of elements.
 
     Raises:
         TypeError: If either `a_mat` or `b_mat` is not a numpy array.
@@ -55,16 +55,22 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     Args:
         df (pd.DataFrame): Cluster-Pathway results. Rows are pathways and columns are clusters.
         axis (int, optional): Integer for axis to test on. 0 for rows, 1 for columns. Defaults to 0.
-        score_lab (str, optional): Col label for data pairing cluster and pathway. Defaults to "combined_score".
+        score_lab (str, optional): Col label for the score. Default "CombinedScore".
 
     Returns:
-        float: A score representing the uniqueness. Returns "NaN" if axis is 1 and the number of columns of df_wide is 1.
+        float: score representing uniqueness of cluster pathway pairs.
+            Returns "NaN" if axis is 1 and only 1 cluster.
+            i.e If only one cluster is found then it's not separated the pathways at all.
 
     Raises:
-        TypeError: If `df` is not a pandas DataFrame, `axis` is not an integer, or `score_lab` is not a string.
-        ValueError: If `pathway` or `ClusterNumber` are not columns in `df`, `axis` is not 0 or 1, or `score_lab` is not a valid column in `df`.
+        TypeError: `df` not a pandas DataFrame
+        TypeError: `axis` not an int
+        TypeError: `score_lab` not a str
+        ValueError: `pathway` or `ClusterNumber` not columns in `df`
+        ValueError: `axis` is not 0 or 1
+        KeyError: `score_lab` is not a valid column in `df`.
     """
-    
+
     # Verify Input Types
     if not isinstance(df, pd.DataFrame):
         error_string = f"""df should be a pandas dataframe instead got {type(str(df))}"""
@@ -112,23 +118,26 @@ def assign_max_and_crop(mat, ignore_cols = None):
     """Assign each column to its maximum row, cropping duplicates.
 
     For each column in the input matrix, identify the row with the maximum value.
-    If a row is the maximum for multiple columns, assign it to the column where its value is greatest.
-    The function then "crops" the matrix by setting the values in the fixed rows and columns to zero,
-    effectively removing them from consideration in subsequent iterations.
+    If row is the max for multiple cols, assign it to the column where its greatest.
+    The function then returns the matrix with the fixed rows and columns set to zero.
+    This ensures new columns are found during the iteration.
 
     Args:
         mat (np.ndarray): The input data matrix.
 
     Returns:
         dict: A dictionary containing the following keys:
-            - "fixed_positions" (list): A list of the indices of the rows that were uniquely assigned to a column.
-            - "col_pairs" (list): A list of the indices of the columns that were paired with the fixed rows.
-            - "out_mat" (np.ndarray): The cropped matrix, with the fixed rows and columns set to zero.
+            - "fixed_positions" (list): indices of rows that are the best match for a column
+            - "col_pairs" (list): indices of columns that pair with `fixed_positions`.
+            - "out_mat" (np.ndarray): cropped matrix, with fixed rows and cols set to 0.
 
     Raises:
         TypeError: If `mat` is not a numpy array.
     """
     # Verify Types
+    if ignore_cols is not None and not isinstance(ignore_cols, list):
+        error_string = f"ignore_cols should either be None or a list, not {type(ignore_cols)}"
+        raise TypeError(error_string)
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
         raise TypeError(error_string)
@@ -226,9 +235,7 @@ def overall_paths(df, score_lab = "CombinedScore"):
     ideal_mat = np.zeros(mat.shape)
     for i,c in enumerate(cols):
         ideal_mat[rows[i], c] = mat[rows[i], c]
-    i_mat = ideal_mat[rows, :]
-    print('before ssd')
-    print(crop_mat, i_mat)
+    i_mat = ideal_mat[sorted(rows), :]
     score = redirect_score(ssd(crop_mat, i_mat))
     return score
 

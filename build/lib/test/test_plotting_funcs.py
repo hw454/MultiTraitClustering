@@ -240,5 +240,62 @@ class TestPlottingFuncs(unittest.TestCase):
         with self.assertRaises(KeyError):
             pc.pathway_bars(data, xlab, ylab, 'invalid_column', max_val, title)
 
+    def test_overlap_bars(self):
+        """Test the overlap_bars function.
+            This test case creates a sample DataFrame and calls the overlap_bars
+            function with valid parameters. It then asserts that the returned object
+            is an instance of alt.Chart.
+            """
+
+        # Create a sample DataFrame
+        data = pd.DataFrame({
+                    'category': ['A', 'B', 'C', 'A', 'B'],
+                    'value': [10, 20, 30, 40, 50],
+                    'group': ['X', 'X', 'Y', 'Y', 'X'],
+                    'separator': ['P', 'Q', 'P', 'Q', 'P']
+        })
+        xlab = 'category'
+        ylab = 'value'
+        group_lab = 'group'
+        sep_lab = 'separator'
+        title = 'Overlap Analysis'
+
+        # Call overlap_bars with valid parameters
+        chart = pc.overlap_bars(data, xlab, ylab, group_lab, sep_lab, title)
+
+        # Assert the type of the returned object
+        self.assertTrue(isinstance(chart, alt.Chart))
+
+        # Negative test cases
+        with self.assertRaises(TypeError):
+            pc.overlap_bars(data.to_numpy(), xlab, ylab, group_lab, sep_lab, title)
+
+        with self.assertRaises(TypeError):
+            pc.overlap_bars(data, 123, ylab, group_lab, sep_lab, title)
+
+        with self.assertRaises(TypeError):
+            pc.overlap_bars(data, xlab, 456, group_lab, sep_lab, title)
+
+        with self.assertRaises(TypeError):
+            pc.overlap_bars(data, xlab, ylab, 789, sep_lab, title)
+
+        with self.assertRaises(TypeError):
+            pc.overlap_bars(data, xlab, ylab, group_lab, 910, title)
+
+        with self.assertRaises(TypeError):
+            pc.overlap_bars(data, xlab, ylab, group_lab, sep_lab, 321)
+
+        with self.assertRaises(KeyError):
+            pc.overlap_bars(data, 'invalid_column', ylab, group_lab, sep_lab, title)
+
+        with self.assertRaises(KeyError):
+            pc.overlap_bars(data, xlab, 'invalid_column', group_lab, sep_lab, title)
+
+        with self.assertRaises(KeyError):
+            pc.overlap_bars(data, xlab, ylab, 'invalid_column', sep_lab, title)
+
+        with self.assertRaises(KeyError):
+            pc.overlap_bars(data, xlab, ylab, group_lab, 'invalid_column', title)
+
 if __name__ == '__main__':
     unittest.main()
