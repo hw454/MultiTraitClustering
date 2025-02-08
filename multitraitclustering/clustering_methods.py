@@ -22,12 +22,12 @@ Description:
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans, DBSCAN, Birch, MiniBatchKMeans
-from sklearn_extra.cluster import KMedoids
 from sklearn.mixture import GaussianMixture
+from sklearn_extra.cluster import KMedoids
 
 from multitraitclustering import multi_trait_clustering as mtc
 from multitraitclustering import data_processing as dp
-from multitraitclustering import checks as checks
+from multitraitclustering import checks
 
 
 def kmeans(
@@ -123,30 +123,22 @@ def kmeans(
         raise ValueError(error_string)
     # Raise ValueError if dist_met not one of "CosineSimilarity" or "Euclidean"
     if dist_met not in [euc_str, cos_str]:
-        error_string = """The input dist_met should be either
-                        {euc}, {cos} not {dist}""".format(
-            euc=euc_str, cos=cos_str, dist=dist_met
-        )
+        error_string = f"""The input dist_met should be either
+                        {euc_str}, {cos_str} not {dist_met}"""
         raise ValueError(error_string)
     # DIMENSION CHECKS
     if assoc_df.shape[0] != res_df.shape[0]:
-        error_string = """"The number of rows in res_df %d
-        should match the number of rows in the association data %d""" % (
-            res_df.shape[0],
-            assoc_df.shape[0],
-        )
+        error_string = f""""The number of rows in res_df {res_df.shape[0]}
+        should match the number of rows in the association data {assoc_df.shape[0]}"""
         raise ValueError(error_string)
     if dist_df.shape[0] != dist_df.shape[1]:
-        error_string = """The number of rows %d should match
-        the number of columns %d in dist_df""" % (
-            dist_df.shape[0],
-            dist_df.shape[1],
-        )
+        error_string = f"""The number of rows {dist_df.shape[0]} should match
+        the number of columns {dist_df.shape[1]} in dist_df"""
         raise ValueError(error_string)
     if dist_df.shape[0] != assoc_df.shape[0]:
-        error_string = """The number of rows in the association
-            data %d does not match the number of rows in the distance
-            data %d""" % (assoc_df.shape[0], dist_df.shape[0])
+        error_string = f"""The number of rows in the association
+            data {assoc_df.shape[0]} does not match the number of rows in the distance
+            data {dist_df.shape[0]}"""
         raise ValueError(error_string)
 
     klab = mtc.method_string("Kmeans", kmeans_alg, dist_met, nclust)
@@ -276,30 +268,22 @@ def kmedoids(
         raise ValueError(error_string)
     # Raise ValueError if dist_met not one of "CosineSimilarity" or "Euclidean"
     if dist_met not in [euc_str, cos_str]:
-        error_string = """The input dist_met should be either
-                        {euc}, {cos} not {dist}""".format(
-            euc=euc_str, cos=cos_str, dist=dist_met
-        )
+        error_string = f"""The input dist_met should be either
+                        {euc_str}, {cos_str} not {dist_met}"""
         raise ValueError(error_string)
     # DIMENSION CHECKS
     if assoc_df.shape[0] != res_df.shape[0]:
-        error_string = """"The number of rows in res_df %d
-        should match the number of rows in the association data %d""" % (
-            res_df.shape[0],
-            assoc_df.shape[0],
-        )
+        error_string = f""""The number of rows in res_df {res_df.shape[0]}
+        should match the number of rows in the association data {assoc_df.shape[0]}"""
         raise ValueError(error_string)
     if dist_df.shape[0] != dist_df.shape[1]:
-        error_string = """The number of rows %d should match
-        the number of columns %d in dist_df""" % (
-            dist_df.shape[0],
-            dist_df.shape[1],
-        )
+        error_string = f"""The number of rows {dist_df.shape[0]} should match
+        the number of columns {dist_df.shape[1]} in dist_df"""
         raise ValueError(error_string)
     if dist_df.shape[0] != assoc_df.shape[0]:
-        error_string = """The number of rows in the association
-            data %d does not match the number of rows in the distance
-            data %d""" % (assoc_df.shape[0], dist_df.shape[0])
+        error_string = f"""The number of rows in the association
+            data {assoc_df.shape[0]} does not match the number of rows in the distance
+            data {dist_df.shape[0]}"""
         raise ValueError(error_string)
 
     # Run the Clustering
@@ -409,29 +393,26 @@ def dbscan(
         raise ValueError(error_string)
     # ValueError if dist_met not one of "CosineSimilarity" or "Euclidean"
     if dist_met not in [euc_str, cos_str]:
-        error_string = """The input dist_met should be either
-                        {euc}, {cos} not {dist}""".format(
-            euc=euc_str, cos=cos_str, dist=dist_met
-        )
+        error_string = f"""The input dist_met should be either
+                        {euc_str}, {cos_str} not {dist_met}"""
         raise ValueError(error_string)
     # DIMENSION CHECKS
     if assoc_df.shape[0] != res_df.shape[0]:
-        error_string = """"The number of rows in res_df %d
+        error_string = f""""The number of rows in res_df {res_df.shape[0]}
             should match the number of rows in the association
-            data %d""" % (res_df.shape[0], assoc_df.shape[0])
+            data {assoc_df.shape[0]}"""
         raise ValueError(error_string)
     if dist_df.shape[0] != dist_df.shape[1]:
-        error_string = """The number of rows %d should match
-            the number of columns %d in dist_df""" % (dist_df.shape[0],
-                                                      dist_df.shape[1])
+        error_string = f"""The number of rows {dist_df.shape[0]} should match
+            the number of columns {dist_df.shape[1]} in dist_df"""
         raise ValueError(error_string)
     if dist_df.shape[0] != assoc_df.shape[0]:
-        error_string = """The number of rows in the association
-            data %d does not match the number of rows in the distance
-            data %d""" % (assoc_df.shape[0], dist_df.shape[0])
+        error_string = f"""The number of rows in the association
+            data {assoc_df.shape[0]} does not match the number of rows in the distance
+            data {dist_df.shape[0]}"""
         raise ValueError(error_string)
     # Run the Clustering
-    meth_str = "DBSCAN%d" % (eps * 100)
+    meth_str = f"DBSCAN{int((eps * 100))}"
     if dist_met == euc_str:
         n_dbscan = DBSCAN(
             eps=eps, min_samples=min_s, metric="euclidean", algorithm=db_alg
@@ -558,40 +539,34 @@ def gmm(
         raise ValueError(error_string)
     # ValueError if gmm_met not one of "CosineSimilarity" or "Euclidean"
     if dist_met not in [euc_str, cos_str]:
-        error_string = """The input dist_met should be either
-                        {euc}, {cos} not {dist}""".format(
-            euc=euc_str, cos=cos_str, dist=dist_met
-        )
+        error_string = f"""The input dist_met should be either
+                        {euc_str}, {cos_str} not {dist_met}"""
         raise ValueError(error_string)
     # DIMENSION CHECKS
     if assoc_df.shape[0] != res_df.shape[0]:
-        error_string = """"The number of rows in res_df %d
-        should match the number of rows in the association data %d""" % (
-            res_df.shape[0],
-            assoc_df.shape[0]
-        )
+        error_string = f""""The number of rows in res_df {res_df.shape[0]}
+        should match the number of rows in the association data {assoc_df.shape[0]}"""
         raise ValueError(error_string)
     if dist_df.shape[0] != dist_df.shape[1]:
-        error_string = """The number of rows %d should match
-            the number of columns %d in dist_df""" % (dist_df.shape[0],
-                                                      dist_df.shape[1])
+        error_string = f"""The number of rows {dist_df.shape[0]} should match
+            the number of columns {dist_df.shape[1]} in dist_df"""
         raise ValueError(error_string)
     if dist_df.shape[0] != assoc_df.shape[0]:
-        error_string = """The number of rows in the association
-            data %d does not match the number of rows in the distance
-            data %d""" % (assoc_df.shape[0], dist_df.shape[0])
+        error_string = f"""The number of rows in the association
+            data {assoc_df.shape[0]} does not match the number of rows in the distance
+            data {dist_df.shape[0]}"""
         raise ValueError(error_string)
     # Run the Clustering
     gmm_lab = mtc.method_string("GMM", cov_type, dist_met, n_comps)
     if dist_met == euc_str:
-        gmm = GaussianMixture(
+        gmm_res = GaussianMixture(
             n_components=n_comps,
             covariance_type=cov_type,
             random_state=rand_st,
             max_iter=max_iter,
             init_params=in_pars
         ).fit(dist_df)
-        res_df[gmm_lab] = gmm.predict(dist_df)
+        res_df[gmm_lab] = gmm_res.predict(dist_df)
         # -----------------------
         # Calculate the centroids
         # Centroid distances
@@ -605,14 +580,14 @@ def gmm(
             metric="euc"
         )
     elif dist_met == "CosineDistance":
-        gmm = GaussianMixture(
+        gmm_res = GaussianMixture(
             n_components=n_comps,
             covariance_type=cov_type,
             random_state=rand_st,
             max_iter=max_iter,
             init_params=in_pars,
         ).fit(dist_df)
-        res_df[gmm_lab] = gmm.predict(dist_df)
+        res_df[gmm_lab] = gmm_res.predict(dist_df)
         # -----------------------
         # Calculate the centroids
         centroids = dp.calc_medoids(

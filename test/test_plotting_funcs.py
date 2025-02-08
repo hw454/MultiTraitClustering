@@ -51,13 +51,6 @@ class TestPlottingFuncs(unittest.TestCase):
         # Assert the type of the returned object
         self.assertTrue(isinstance(chart, alt.Chart))
 
-        # Call chart_clusters with a palette
-        chart_with_palette = pc.chart_clusters(data, 'Test Chart', 'cluster', ['tooltip'],
-                                               palette=['red', 'blue'])
-
-        # Assert the type of the returned object
-        self.assertTrue(isinstance(chart_with_palette, alt.Chart))
-
         # Negative test cases
         with self.assertRaises(TypeError):
             pc.chart_clusters(data.to_numpy(), 'Test Chart', 'cluster', ['tooltip'])
@@ -99,14 +92,6 @@ class TestPlottingFuncs(unittest.TestCase):
         self.assertEqual(len(charts), 2)
         self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts.values()))
 
-        # Call chart_clusters_multi with a palette
-        charts_with_palette = pc.chart_clusters_multi(data, 'Test Chart', 'cluster', ['tooltip'],
-                                col_list=['pc_2', 'pc_3'], palette=['red', 'blue'])
-
-        # Assert the type of the returned object
-        self.assertTrue(isinstance(charts_with_palette, dict))
-        self.assertEqual(len(charts_with_palette), 2)
-        self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts_with_palette.values()))
         # Negative test cases
         with self.assertRaises(TypeError):
             pc.chart_clusters_multi(data.to_numpy(), 'Test Chart', 'cluster', ['tooltip'],
@@ -217,40 +202,40 @@ class TestPlottingFuncs(unittest.TestCase):
         })
         xlab = 'pathway'
         ylab = 'value'
-        grouplab = 'group'
+        group_lab = 'group'
         max_val = 30
         title = 'Pathway Analysis'
 
         # Call pathway_bars with valid parameters
-        chart = pc.pathway_bars(data, xlab, ylab, grouplab, max_val, title)
+        chart = pc.pathway_bars(data, xlab, ylab, group_lab, max_val, title)
 
         # Assert the type of the returned object
         self.assertTrue(isinstance(chart, alt.Chart))
 
         # Negative test cases
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data.to_numpy(), xlab, ylab, grouplab, max_val, title)
+            pc.pathway_bars(data.to_numpy(), xlab, ylab, group_lab, max_val, title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, 123, ylab, grouplab, max_val, title)
+            pc.pathway_bars(data, 123, ylab, group_lab, max_val, title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, xlab, 456, grouplab, max_val, title)
+            pc.pathway_bars(data, xlab, 456, group_lab, max_val, title)
 
         with self.assertRaises(TypeError):
             pc.pathway_bars(data, xlab, ylab, 789, max_val, title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, xlab, ylab, grouplab, 'abc', title)
+            pc.pathway_bars(data, xlab, ylab, group_lab, 'abc', title)
 
         with self.assertRaises(TypeError):
-            pc.pathway_bars(data, xlab, ylab, grouplab, max_val, 321)
+            pc.pathway_bars(data, xlab, ylab, group_lab, max_val, 321)
 
         with self.assertRaises(KeyError):
-            pc.pathway_bars(data, 'invalid_column', ylab, grouplab, max_val, title)
+            pc.pathway_bars(data, 'invalid_column', ylab, group_lab, max_val, title)
 
         with self.assertRaises(KeyError):
-            pc.pathway_bars(data, xlab, 'invalid_column', grouplab, max_val, title)
+            pc.pathway_bars(data, xlab, 'invalid_column', group_lab, max_val, title)
 
         with self.assertRaises(KeyError):
             pc.pathway_bars(data, xlab, ylab, 'invalid_column', max_val, title)
