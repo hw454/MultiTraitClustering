@@ -115,11 +115,11 @@ def chart_clusters_multi(
     if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not color_var in data.columns:
-        error_string = f"""The columns {color_var} is not in the data.
+        error_string = f"""The columns {color_var} is not in the data. 
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     if xcol is not None and not xcol in data.columns:
-        error_string = f"""The columns {xcol} is not in the data.
+        error_string = f"""The columns {xcol} is not in the data. 
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     if col_list is not None and not all(col in data.columns for col in col_list):

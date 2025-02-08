@@ -91,6 +91,7 @@ class TestPlottingFuncs(unittest.TestCase):
         self.assertTrue(isinstance(charts, dict))
         self.assertEqual(len(charts), 2)
         self.assertTrue(all(isinstance(chart, alt.Chart) for chart in charts.values()))
+
         # Negative test cases
         with self.assertRaises(TypeError):
             pc.chart_clusters_multi(data.to_numpy(), 'Test Chart', 'cluster', ['tooltip'],
