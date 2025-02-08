@@ -8,7 +8,7 @@ Description:
         for evaluating clustering results.
     - Applying various clustering methods to association data.
     - Generating descriptive strings for clustering methods based on their parameters.
-    """
+"""
 
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
