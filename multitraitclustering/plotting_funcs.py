@@ -357,7 +357,28 @@ def overlap_bars(df, xlab, ylab, group_lab, sep_lab, title):
 
         Returns:
             alt.Chart: An Altair chart object representing the overlapping bar chart.  The x-axis labels are hidden.  The column headers are rotated and aligned for better readability.
-        """
+    """
+    # Input checks
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame.")
+    if not isinstance(xlab, str):
+        raise TypeError("xlab must be a string.")
+    if not isinstance(ylab, str):
+        raise TypeError("ylab must be a string.")
+    if not isinstance(group_lab, str):
+        raise TypeError("group_lab must be a string.")
+    if not isinstance(sep_lab, str):
+        raise TypeError("sep_lab must be a string.")
+    if not isinstance(title, str):
+        raise TypeError("title must be a string.")
+    if xlab not in df.columns:
+        raise KeyError("xlab must be a column in df.")
+    if ylab not in df.columns:
+        raise KeyError("ylab must be a column in df.")
+    if group_lab not in df.columns:
+        raise KeyError("group_lab must be a column in df.")
+    if sep_lab not in df.columns:
+        raise KeyError("sep_lab must be a column in df.")
     chart = (
         alt.Chart(df, title=title)
         .mark_bar()
