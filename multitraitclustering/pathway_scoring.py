@@ -41,6 +41,7 @@ def ssd(a_mat, b_mat):
         raise ValueError(error_string)
     # Compute ssd
     dif = a_mat.ravel() - b_mat.ravel()
+
     return abs(dif).sum()/(len(a_mat.ravel()))
 
 def uniqueness(df, axis = 0, score_lab = "combined_score"):
@@ -63,6 +64,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
         TypeError: If `df` is not a pandas DataFrame, `axis` is not an integer, or `score_lab` is not a string.
         ValueError: If `pathway` or `ClusterNumber` are not columns in `df`, `axis` is not 0 or 1, or `score_lab` is not a valid column in `df`.
     """
+    
     # Verify Input Types
     if not isinstance(df, pd.DataFrame):
         error_string = f"""df should be a pandas dataframe instead got {type(str(df))}"""
@@ -150,6 +152,7 @@ def assign_max_and_crop(mat, ignore_cols = None):
         else:
             fixed_ps += [pos_dict[c]]
             col_pairs += [c]
+    reassign_ps = set(reassign_ps)
     # Which rows can still be considered?
     # Note this will consider rows fixed on previous iterations but their values
     # will be zero from the cropping so they shouldn't get picked up
@@ -163,8 +166,8 @@ def assign_max_and_crop(mat, ignore_cols = None):
         col_pairs += [max_col]
     consider_cols = [c for c in range(mat.shape[1]) if c not in col_pairs]
     consider_rows = [c for c in range(mat.shape[0]) if c not in fixed_ps]
-    out_mat[consider_rows, :] = mat[consider_rows, :]
-    out_mat[:, consider_cols] = mat[:, consider_cols]
+    for c in consider_cols:
+        out_mat[consider_rows, c] = mat[consider_rows, c]
     out_dict = {"fixed_positions": fixed_ps,
                 "col_pairs": col_pairs,
                 "out_mat": out_mat}
@@ -213,15 +216,20 @@ def overall_paths(df, score_lab = "CombinedScore"):
     mat = np.nan_to_num(df_wide.to_numpy())
     # Compute the best match matrix and get the corresponding indexes
     best_mat_out= path_best_matches(df, score_lab=score_lab)
-    crop_df = best_mat_out["best_df"].pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
+    crop_df = best_mat_out["best_df"].pivot_table(index='pathway',
+                                                  columns='ClusterNumber',
+                                                  values=score_lab)
     crop_mat = np.nan_to_num(crop_df.to_numpy())
     rows = best_mat_out["row_positions"]
     cols = best_mat_out["col_pairs"]
     # Compute the overall score using the best match matrix
     ideal_mat = np.zeros(mat.shape)
-    ideal_mat[rows, cols] = mat[rows, cols]
-    ideal_mat = ideal_mat[rows,:]
-    score = redirect_score(ssd(crop_mat, ideal_mat))
+    for i,c in enumerate(cols):
+        ideal_mat[rows[i], c] = mat[rows[i], c]
+    i_mat = ideal_mat[rows, :]
+    print('before ssd')
+    print(crop_mat, i_mat)
+    score = redirect_score(ssd(crop_mat, i_mat))
     return score
 
 def redirect_score(score):
@@ -299,7 +307,6 @@ def path_best_matches(df, score_lab = "CombinedScore"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise KeyError(error_string)
-
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Get the row number for the maximum in each column
@@ -313,7 +320,7 @@ def path_best_matches(df, score_lab = "CombinedScore"):
     out_mat = mat.copy()
     for _ in range(mat.shape[1]):
         # Max number of iterations is the number of columns
-        out_dict = assign_max_and_crop(out_mat)
+        out_dict = assign_max_and_crop(out_mat, ignore_cols=col_pairs)
         fixed_ps += out_dict["fixed_positions"]
         col_pairs += out_dict["col_pairs"]
         out_mat = out_dict["out_mat"]
