@@ -71,7 +71,7 @@ def get_pathway_rows_from_data(data, c_num_lab):
 
     Args:
         data (list): A list containing pathway data with the following elements:
-            - rank (int, or str): The rank of the pathway.
+            - rank (int): The rank of the pathway.
             - pathway (str): The name of the pathway.
             - pval (float): The p-value associated with the pathway.
             - OR (float): The odds ratio.
@@ -91,10 +91,12 @@ def get_pathway_rows_from_data(data, c_num_lab):
     if not isinstance(data, list):
         raise TypeError(f"data should be a list, not {type(data)}")
     # Check that data contains the necessary terms
-    if len(data) != 7:
-        error_string = """data should contain exactly 7 elements: rank, pathway,
+    if len(data) < 7:
+        error_string = """data should contain at least 7 elements: rank, pathway,
             pval, OR, score, overlap_genes, adjust_pval"""
         raise ValueError(error_string)
+    if not isinstance(data[0], int):
+        raise TypeError(f"data[0] (rank) should be an int, not {type(data[0])}")
     if not isinstance(data[1], str):
         raise TypeError(f"data[1] (pathway) should be a str, not {type(data[1])}")
     if not isinstance(data[2], float):
@@ -110,6 +112,8 @@ def get_pathway_rows_from_data(data, c_num_lab):
     rank = data[0]
     pathway = data[1]
     path_full = pathway.split(" R-")
+    if len(path_full)<2:
+        raise ValueError("The pathway part of data should contain ` R-`.")
     pathway = path_full[0]
     path_id = "R-"+path_full[1]
     pval = data[2]
@@ -252,7 +256,7 @@ def enrich_clust(gene_set, meth_key, c_num_lab, gene_library, req_ses, max_tries
             out_rows = get_pathway_rows_from_data(data[i], c_num_lab)
             score_clust_list += [out_rows["score_row"]]
             all_clust_list += [out_rows["all_row"]]
-            or_clust_list += [out_rows["OR_row"]]
+            or_clust_list += [out_rows["or_row"]]
     else:
         all_clust_list = [{"ClusterNumber": c_num_lab,
                           "pathway": "NoPathway",

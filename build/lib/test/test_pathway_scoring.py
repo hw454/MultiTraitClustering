@@ -91,7 +91,10 @@ class TestPathwayScoring(unittest.TestCase):
         rows = [[random.randint(0, nr-1) for i in range(nterms)] for j in range(nc)]
         for j in range(nc):
             a[rows[j],j] = [random.random() for i in range(nterms)]
-        one_pass = ps.assign_max_and_crop(a)
+        one_pass = ps.assign_max_and_crop(a, ignore_cols = [])
+        # Check output is a dictionary
+        self.assertTrue(isinstance(one_pass, dict))
+        one_pass = ps.assign_max_and_crop(a, ignore_cols = [2])
         # Check output is a dictionary
         self.assertTrue(isinstance(one_pass, dict))
         # Check the types of the terms in the output
@@ -175,9 +178,12 @@ class TestPathwayScoring(unittest.TestCase):
         # Check output is dict
         self.assertTrue(isinstance(best_out, dict))
         # Check types of the terms in the dict
-        self.assertTrue(isinstance(best_out["best_mat"], np.ndarray))
+        print(type(best_out["best_df"]))
+        self.assertTrue(isinstance(best_out["best_df"], pd.DataFrame))
         self.assertTrue(isinstance(best_out["row_positions"], list))
         self.assertTrue(isinstance(best_out["col_pairs"], list))
+        # Check the number of rows equals the number of cols
+        self.assertTrue(len(best_out["row_positions"])==len(best_out["col_pairs"]))
         # ---------------------
         # NEGATIVE CHECKS
         # TypeError if df not dataframe
