@@ -66,10 +66,10 @@ def chart_clusters(
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     chart = (
-            alt.Chart(data, title=title)
-            .mark_circle(size=60)
-            .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
-            .interactive()
+        alt.Chart(data, title=title)
+        .mark_circle(size=60)
+        .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
+        .interactive()
     )
     return chart
 
@@ -87,7 +87,6 @@ def chart_clusters_multi(
 
     This function iterates through a list of columns, creating a scatter plot for each column
     against a fixed x-axis. The plots are colored according to a specified variable,
-
     typically cluster assignments.
 
     Args:
@@ -142,9 +141,9 @@ def chart_clusters_multi(
     chart_dict = {}
     for col2 in col_list:
         chart_dict[col2] = (
-                alt.Chart(data, title=title)
-                .mark_circle(size=60)
-                .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
+            alt.Chart(data, title=title)
+            .mark_circle(size=60)
+            .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
         )
     return chart_dict
 
@@ -158,8 +157,8 @@ def chart_cluster_compare(
         data_array (numpy array): Comparison data - long form -
             x_lab (clust_no. for method 1), y_lab (clust_no for method 2),
             z_lab - no. in intersection/ no. in union
-        xlabels (list of strings): Cluster labels for the columns
-        ylabels (list of strings): Cluster labels for the rows
+        xlabels (list of strings or array of numbers): Cluster labels for the columns
+        ylabels (list of strings or array of numbers): Cluster labels for the rows
         x_lab (string): Label to get the x data from
         y_lab (string): Label to get the y data from
         z_lab (string): Label for the column containing the overlap percentage
@@ -171,10 +170,10 @@ def chart_cluster_compare(
     # Input Checks
     if not isinstance(data_array, np.ndarray):
         raise TypeError("data_array must be a numpy array.")
-    if not isinstance(xlabels, list):
-        raise TypeError("xlabels must be a list.")
-    if not isinstance(ylabels, list):
-        raise TypeError("ylabels must be a list.")
+    if not isinstance(xlabels, (list, np.ndarray)):
+        raise TypeError("xlabels must be a list or array")
+    if not isinstance(ylabels, (list, np.ndarray)):
+        raise TypeError("ylabels must be a list or array")
     if not isinstance(x_lab, str):
         raise TypeError("x_lab must be a string.")
     if not isinstance(y_lab, str):
@@ -199,8 +198,8 @@ def chart_cluster_compare(
     x_clust = {i: cn for i, cn in enumerate(xlabels)}
     y_clust = {j: cn for j, cn in enumerate(ylabels)}
     z = data_array
-    source = pd.DataFrame(dtype= str, 
-        data = {x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()}
+    source = pd.DataFrame(
+        dtype=str, data={x_lab: x.ravel(), y_lab: y.ravel(), z_lab: z.ravel()}
     )
     for i in range(0, xlen):
         source.loc[source[x_lab] == i, x_lab] = x_clust[i]
@@ -332,7 +331,7 @@ def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
                 # the color is set to steelblue.
                 alt.value("steelblue"),
             ),
-            column = alt.Column(
+            column=alt.Column(
                 group_lab + ":N",
                 header=alt.Header(
                     labelAngle=-90, orient="top", labelOrient="top", labelAlign="right"
@@ -343,4 +342,3 @@ def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
         .interactive()
     )
     return chart
-

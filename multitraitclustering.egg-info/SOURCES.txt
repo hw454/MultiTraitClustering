@@ -25,4 +25,5 @@ test/test_data_setup.py
 test/test_multitrait_clustering.py
 test/test_pathway_enrichment.py
 test/test_pathway_scoring.py
+test/test_plotting_funcs.py
 test/test_string_funcs.py
