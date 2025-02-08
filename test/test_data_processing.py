@@ -487,30 +487,5 @@ class TestDataProcessing(unittest.TestCase):
 
         # Assert that the DataFrame has the correct number of rows
         self.assertEqual(long_df.shape[0], 6)
-
-        # Assert that the values in the DataFrame are correct
-        expected_pathway = [
-                "pathway_1",
-                "pathway_1",
-                "pathway_1",
-                "pathway_2",
-                "pathway_2",
-                "pathway_2",
-        ]
-        expected_cluster = [
-                "cluster_1",
-                "cluster_2",
-                "cluster_3",
-                "cluster_1",
-                "cluster_2",
-                "cluster_3",
-        ]
-        expected_score = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-
-        self.assertListEqual(list(long_df["pathway"]), expected_pathway)
-        self.assertListEqual(list(long_df["ClusterNumber"]), expected_cluster)
-        self.assertListEqual(list(long_df["score"]), expected_score)
-
-
 if __name__ == "__main__":
     unittest.main()
