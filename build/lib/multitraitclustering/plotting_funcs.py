@@ -143,7 +143,7 @@ def chart_clusters_multi(
         chart_dict[col2] = (
             alt.Chart(data, title=title)
             .mark_circle(size=60)
-            .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
+            .encode(x=col1, y=col2, color=color_var + ":N", tooltip=tooltip)
         )
     return chart_dict
 
@@ -340,5 +340,59 @@ def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
             ),
         )
         .interactive()
+    )
+    return chart
+
+
+def overlap_bars(df, xlab, ylab, group_lab, sep_lab, title):
+    """Generates an Altair bar chart with overlapping bars, faceted by group.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame containing the data to plot.
+            xlab (str): name of col in DataFrame for the x-axis, categorical data.
+            ylab (str): name of col in DataFrame for the y-axis, quantitative data.
+            group_lab (str): name of col in DataFrame for faceting the chart into groups, categorical data.
+            sep_lab (str): name of col in DataFrame to separate bars within groups (color), categorical data.
+            title (str): The title of the chart.
+
+        Returns:
+            alt.Chart: An Altair chart object representing the overlapping bar chart.  The x-axis labels are hidden.  The column headers are rotated and aligned for better readability.
+    """
+    # Input checks
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame.")
+    if not isinstance(xlab, str):
+        raise TypeError("xlab must be a string.")
+    if not isinstance(ylab, str):
+        raise TypeError("ylab must be a string.")
+    if not isinstance(group_lab, str):
+        raise TypeError("group_lab must be a string.")
+    if not isinstance(sep_lab, str):
+        raise TypeError("sep_lab must be a string.")
+    if not isinstance(title, str):
+        raise TypeError("title must be a string.")
+    if xlab not in df.columns:
+        raise KeyError("xlab must be a column in df.")
+    if ylab not in df.columns:
+        raise KeyError("ylab must be a column in df.")
+    if group_lab not in df.columns:
+        raise KeyError("group_lab must be a column in df.")
+    if sep_lab not in df.columns:
+        raise KeyError("sep_lab must be a column in df.")
+    chart = (
+        alt.Chart(df, title=title)
+        .mark_bar()
+        .encode(
+            x=alt.X(xlab + ":N", axis=alt.Axis(labels=False), title=None),
+            y=ylab + ":Q",
+            color=alt.Color(sep_lab + ":N", title=None),
+            column=alt.Column(
+                group_lab + ":N",
+                header=alt.Header(
+                    labelAngle=-90, orient="top", labelOrient="top", labelAlign="right"
+                ),
+                title=None,
+            ),
+        )
     )
     return chart

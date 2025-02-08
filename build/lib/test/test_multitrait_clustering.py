@@ -1,6 +1,22 @@
+"""
+Author: Hayley Wragg
+Created: 10th December 2024
+Description:
+    Unit tests for the multi-trait clustering module.
+
+    This module contains several test cases for functions in the
+    `multitraitclustering` module, including:
+
+    - `method_string`: Tests the generation of a method string.
+    - `get_aic`: Tests the calculation of the Akaike Information Criterion (AIC).
+    - `get_bic`: Tests the calculation of the Bayesian Information Criterion (BIC).
+    - `cluster_all_methods`: Tests the clustering of all methods.
+"""
+
 import unittest
-import pandas as pd
 import random as rnd
+
+import pandas as pd
 import numpy as np
 
 from multitraitclustering import data_setup as dm
@@ -8,15 +24,42 @@ from multitraitclustering import multi_trait_clustering as mtc
 
 
 def exclude_check(s):
+    """
+    Checks if a string contains any characters from the exclude_list or any numeric characters.
+    Args:
+        s (str): The string to check.
+    Returns:
+        bool: False if string contains characters from exclude_list or numeric, True otherwise.
+    """
     exclude_list = [" ", "_"]
     if any([letter in exclude_list or letter.isnumeric()] for letter in s):
         return False
     else:
         return True
 
-
 class TestMultiTraitClustering(unittest.TestCase):
-
+    """Unit tests for the MultiTraitClustering module.
+    This class contains several test methods to verify the functionality of the
+    MultiTraitClustering module, including:
+    - `test_method_string`: Tests the `method_string` function, which generates a
+        formatted string from input strings and a number.  It checks for correct
+        output type, content, and proper handling of invalid input types.
+    - `test_get_aic`: Tests the `get_aic` function, which calculates the Akaike
+        Information Criterion (AIC) from a DataFrame containing cluster assignments
+        and distances. It validates the output type and checks for correct error
+        handling when the input DataFrame is malformed or of the wrong type.
+    - `test_get_bic`: Tests the `get_bic` function, which calculates the Bayesian
+        Information Criterion (BIC) from a DataFrame containing cluster assignments
+        and distances. It validates the output type and checks for correct error
+        handling when the input DataFrame is malformed or of the wrong type, or
+        when dimension or n_params are invalid.
+    - `test_cluster_all_methods`: Tests the `cluster_all_methods` function, which
+        performs clustering using multiple methods. It verifies that the output is
+        a dictionary containing a DataFrame of clustering results and a dictionary
+        of clustering parameters. It also checks for correct error handling when
+        input DataFrames are malformed or of the wrong type, or when the number
+        of dimensions doesn't match between dataframes.
+"""
     def test_method_string(self):
         """take in four inputs (3 string, 1 numeric) and output a string label.
         output contains no spaces, underscores or numerics and be title case.
@@ -180,6 +223,16 @@ class TestMultiTraitClustering(unittest.TestCase):
         )
 
     def test_cluster_all_methods(self):
+        """
+        Test the cluster_all_methods function.
+        This test checks the following:
+            - The output is a dictionary with a dataframe and dictionary.
+            - The keys for the clust_pars_dict match the columns for clust_df.
+            - TypeErrors are raised when the input is not a dataframe.
+            - ValueError is raised when the number of dimensions doesn't match.
+            - KeyError is raised when the exp_df doesn't contain a column named EXP.
+        """
+
         data = dm.load_association_data(
             path_dir="./data/TestData/",
             eff_fname="unstdBeta_df.csv",
@@ -188,7 +241,7 @@ class TestMultiTraitClustering(unittest.TestCase):
         ndata = data["eff_df"].shape[0]
         ntraits = 112
         rand_data = np.random.rand(ndata, ntraits)
-        trait_labs = ["trait%d" % i for i in range(ntraits)]
+        trait_labs = [f"trait{i}" for i in range(ntraits)]
         dummy_assoc_df = pd.DataFrame(
             index=data["eff_df"].index, data=rand_data, columns=trait_labs
         )
@@ -227,7 +280,16 @@ class TestMultiTraitClustering(unittest.TestCase):
             exp_df=data["exp_df"],
             assoc_df=dummy_assoc_df.iloc[0:-2, :],
         )
-
+        # KeyError when the exp_df doesn't contain a column named EXP
+        exp_wrong_col = data["exp_df"].rename(
+            columns = {data["exp_df"].columns[0]: "invalid"}
+        )
+        self.assertRaises(
+            KeyError,
+            mtc.cluster_all_methods,
+            exp_df=exp_wrong_col,
+            assoc_df=data["eff_df"],
+        )
 
 if __name__ == "__main__":
     unittest.main()

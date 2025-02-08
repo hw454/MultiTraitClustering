@@ -8,7 +8,7 @@ Description:
         for evaluating clustering results.
     - Applying various clustering methods to association data.
     - Generating descriptive strings for clustering methods based on their parameters.
-    """
+"""
 
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -181,6 +181,12 @@ def cluster_all_methods(exp_df, assoc_df):
                            -keys matching cluster label.,
                           "clust_results": Dataframe with rows corresponding
                           to snps and columns to the cluster methods.}
+    Raises:
+        TypeError: If exp_df or assoc_df are not pandas DataFrames.
+        KeyError: If the 'EXP' column is not present in exp_df.
+        ValueError: If the number of rows in assoc_df and exp_df do not match.
+        ValueError: If the keys between the clustering method parameter labels
+                    and clustering results do not match.
     """
     if not isinstance(exp_df, pd.DataFrame):
         error_string = """Expected dataframe for the exposure scores
@@ -190,6 +196,10 @@ def cluster_all_methods(exp_df, assoc_df):
         error_string = """Expected dataframe for the traits scores
             but got """ + str(type(assoc_df))
         raise TypeError(error_string)
+    if "EXP" not in exp_df.columns:
+        error_string = f"""There must be a columns named EXP in exp_df.
+            Avilable columns: {exp_df.columns}"""
+        raise KeyError(error_string)
     if assoc_df.shape[0] != exp_df.shape[0]:
         error_string = f"""no. of points in assoc_df is {assoc_df.shape[0]} mismatch with
                       {exp_df.shape[0]} in eff_df"""
