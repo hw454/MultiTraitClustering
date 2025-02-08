@@ -276,6 +276,31 @@ def calc_medoids(data, data_dist, membership):
 
     return medoids_df
 
+def long_df_from_p_cnum_arr(a_mat, row_lab_dict, col_lab_dict,
+                            score_lab,
+                            row_lab = "pathway",
+                            col_lab = "ClusterNumber"):
+    """Convert a matrix to a long format DataFrame.
+        Args:
+            a_mat (np.ndarray): A matrix of values to convert to a long format DataFrame.
+            row_lab_dict (dict): A dictionary mapping row indices to row labels.
+            col_lab_dict (dict): A dictionary mapping column indices to column labels.
+            score_lab (str): The name to use for the column containing the values in the matrix.
+            row_lab (str, optional): The name to use for the column containing the row labels. Defaults to "pathway".
+            col_lab (str, optional): The name to use for the column containing the column labels. Defaults to "ClusterNumber".
+        Returns:
+            pd.DataFrame: A long format DataFrame with columns for row labels, column labels, and values.
+    """
+    a_df = pd.DataFrame(index = row_lab_dict.values(),
+                        data = a_mat,
+                        columns = col_lab_dict.values())
+    long_df = pd.melt(a_df, 
+                      value_vars = a_df.columns,
+                      value_name=score_lab,
+                      var_name=col_lab,
+                      ignore_index=False)
+    long_df.reset_index(names=row_lab, inplace=True)
+    return(long_df)
 
 def overlap_score(comp_percent_df):
     """Compute overlap score from percentage overlaps between cluster pairings.

@@ -15,6 +15,7 @@ def format_strings(test_str):
             test_str = test_str.replace(ele,  num_to_word(ele).title())
     return test_str
 
+
 def num_to_word(num_orig):
     """Convert integer numbers into their word equivalents.
 

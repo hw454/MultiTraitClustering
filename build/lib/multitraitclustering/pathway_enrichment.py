@@ -56,6 +56,22 @@ def _validate_dict_trio(path_clust_all_dict, path_clust_or_dict, path_clust_scor
     _type_dict_check(path_clust_score_dict)
     for k in path_clust_all_dict.keys():
         _path_id_check(path_clust_all_dict[k])
+        if "OddsRatio" not in path_clust_or_dict[k]:
+            error_string = f"""OddsRatio column is missing from `or_dict` for method {k}.
+                Available columns :{path_clust_or_dict[k]}"""
+            raise KeyError(error_string)
+        if "CombinedScore" not in path_clust_score_dict[k]:
+            error_string = f"""CombinedScore column is missing from `score_dict` for method {k}.
+                Available columns :{path_clust_score_dict[k]}"""
+            raise KeyError(error_string)
+        if "OddsRatio" not in path_clust_all_dict[k]:
+            error_string = f"""OddsRatio column is missing from `all_dict` for method {k}.
+                Available columns :{path_clust_all_dict[k]}"""
+            raise KeyError(error_string)
+        if "CombinedScore" not in path_clust_all_dict[k]:
+            error_string = f"""CombinedScore column is missing from `all_dict` for method {k}.
+                Available columns :{path_clust_all_dict[k]}"""
+            raise KeyError(error_string)
         if 'pval' not in path_clust_all_dict[k].columns:
             error_string = f"""path_clust_all_dict must contain 'pval' column.
                 Available columns: {path_clust_all_dict[k].columns.tolist()}"""
@@ -71,7 +87,7 @@ def get_pathway_rows_from_data(data, c_num_lab):
 
     Args:
         data (list): A list containing pathway data with the following elements:
-            - rank (int, or str): The rank of the pathway.
+            - rank (int): The rank of the pathway.
             - pathway (str): The name of the pathway.
             - pval (float): The p-value associated with the pathway.
             - OR (float): The odds ratio.
@@ -91,10 +107,12 @@ def get_pathway_rows_from_data(data, c_num_lab):
     if not isinstance(data, list):
         raise TypeError(f"data should be a list, not {type(data)}")
     # Check that data contains the necessary terms
-    if len(data) != 7:
-        error_string = """data should contain exactly 7 elements: rank, pathway,
+    if len(data) < 7:
+        error_string = """data should contain at least 7 elements: rank, pathway,
             pval, OR, score, overlap_genes, adjust_pval"""
         raise ValueError(error_string)
+    if not isinstance(data[0], int):
+        raise TypeError(f"data[0] (rank) should be an int, not {type(data[0])}")
     if not isinstance(data[1], str):
         raise TypeError(f"data[1] (pathway) should be a str, not {type(data[1])}")
     if not isinstance(data[2], float):
@@ -110,6 +128,8 @@ def get_pathway_rows_from_data(data, c_num_lab):
     rank = data[0]
     pathway = data[1]
     path_full = pathway.split(" R-")
+    if len(path_full)<2:
+        raise ValueError("The pathway part of data should contain ` R-`.")
     pathway = path_full[0]
     path_id = "R-"+path_full[1]
     pval = data[2]
@@ -252,23 +272,27 @@ def enrich_clust(gene_set, meth_key, c_num_lab, gene_library, req_ses, max_tries
             out_rows = get_pathway_rows_from_data(data[i], c_num_lab)
             score_clust_list += [out_rows["score_row"]]
             all_clust_list += [out_rows["all_row"]]
-            or_clust_list += [out_rows["OR_row"]]
+            or_clust_list += [out_rows["or_row"]]
     else:
         all_clust_list = [{"ClusterNumber": c_num_lab,
                           "pathway": "NoPathway",
                           "path_id": "No_id",
-                          "pval": None}]
+                          "pval": None,
+                          "OddsRatio": None,
+                          "CombinedScore": None}]
         or_clust_list = [{"ClusterNumber": c_num_lab,
                           "pathway": "NoPathway",
-                          "path_id": "No_id"}]
+                          "path_id": "No_id",
+                          "OddsRatio": None}]
         score_clust_list = [{"ClusterNumber": c_num_lab,
                           "pathway": "NoPathway",
-                          "path_id": "No_id"}]
+                          "path_id": "No_id",
+                          "CombinedScore": None}]
     score_list += score_clust_list
     all_list += all_clust_list
     or_list += or_clust_list
     out_dict = {"all_list": all_list,
-        "OR_list": or_list,
+        "or_list": or_list,
         "score_list": score_list,
         "user_list_id": user_id}
     return out_dict
@@ -315,11 +339,24 @@ def enrich_method(meth_key, gene_clust_dict, gene_set_library, req_ses):
         time.sleep(10)
         score_list += enrich_dict["score_list"]
         all_list += enrich_dict["all_list"]
-        or_list += enrich_dict["OR_list"]
+        or_list += enrich_dict["or_list"]
         user_ids_list = enrich_dict["user_list_id"]
     score_df = pd.DataFrame(score_list)
     all_df = pd.DataFrame(all_list)
     or_df =  pd.DataFrame(or_list)
+    # Check that the Dataframes contain the correct columns
+    if "OddsRatio" not in or_df.columns:
+        error_string = f"OddsRatio not a col in or_df. Available columns: {or_df.columns}"
+        raise KeyError(error_string)
+    if "CombinedScore" not in score_df.columns:
+        error_string = f"CombinedScore not a col in score_df. Available columns: {score_df.columns}"
+        raise KeyError(error_string)
+    if "OddsRatio" not in all_df.columns:
+        error_string = f"OddsRatio not a col in all_df. Available columns: {all_df.columns}"
+        raise KeyError(error_string)
+    if "CombinedScore" not in all_df.columns:
+        error_string = f"CombinedScore not a col in all_df. Available columns: {all_df.columns}"
+        raise KeyError(error_string)
     out_dict = {"user_ids_list": user_ids_list,
         "or_df": or_df,
         "score_df": score_df,
