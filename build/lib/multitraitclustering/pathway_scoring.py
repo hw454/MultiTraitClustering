@@ -235,9 +235,7 @@ def overall_paths(df, score_lab = "CombinedScore"):
     ideal_mat = np.zeros(mat.shape)
     for i,c in enumerate(cols):
         ideal_mat[rows[i], c] = mat[rows[i], c]
-    i_mat = ideal_mat[rows, :]
-    print('before ssd')
-    print(crop_mat, i_mat)
+    i_mat = ideal_mat[sorted(rows), :]
     score = redirect_score(ssd(crop_mat, i_mat))
     return score
 

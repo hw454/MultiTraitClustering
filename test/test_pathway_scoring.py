@@ -242,8 +242,7 @@ class TestPathwayScoring(unittest.TestCase):
         # Create a long form data_frame from matrix
         expec = [e0, e1, e2, e3]
         re_expec = [ps.redirect_score(e) for e in expec]
-        # TODO #40 pathway score not getting expected values.
-        for i, a_mat in enumerate([a0]): #, a1, a2, a4]):
+        for i, a_mat in enumerate([a0, a1, a2, a4]):
             a_df = dp.long_df_from_p_cnum_arr(a_mat,
                                     row_lab_dict=row_lab_dict,
                                     col_lab_dict=col_lab_dict,
