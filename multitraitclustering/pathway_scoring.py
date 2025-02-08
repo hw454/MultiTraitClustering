@@ -216,7 +216,8 @@ def overall_paths(df, score_lab = "combined_score"):
     cols = best_mat_out["col_pairs"]
     # Compute the overall score using the best match matrix
     ideal_mat = np.zeros(mat.shape)
-    ideal_mat[rows, cols] = mat[rows, cols]
+    for c in cols:
+        ideal_mat[rows, c] = mat[rows, c]
     ideal_mat = ideal_mat[rows,:]
     score = redirect_score(ssd(crop_mat, ideal_mat))
     return score

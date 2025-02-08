@@ -182,6 +182,8 @@ class TestPathwayScoring(unittest.TestCase):
         self.assertTrue(isinstance(best_out["best_df"], pd.DataFrame))
         self.assertTrue(isinstance(best_out["row_positions"], list))
         self.assertTrue(isinstance(best_out["col_pairs"], list))
+        # Check the number of rows equals the number of cols
+        self.assertTrue(len(best_out["row_positions"])==len(best_out["col_pairs"]))
         # ---------------------
         # NEGATIVE CHECKS
         # TypeError if df not dataframe
