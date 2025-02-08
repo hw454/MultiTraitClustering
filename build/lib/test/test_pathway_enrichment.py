@@ -115,6 +115,13 @@ class TestPathwayEnrichment(unittest.TestCase):
         self.assertIn("or_row", result)
         self.assertIn("score_row", result)
         self.assertIn("all_row", result)
+        # Check that the or_row contains the term OddsRatio
+        self.assertTrue("OddsRatio" in result["or_row"].keys())
+        # Check that the score_row contains the term CombinedScore
+        self.assertTrue("CombinedScore" in result["score_row"].keys())
+        # Check the the all_row contains the term OddsRatio and CombinedScore
+        self.assertTrue("OddsRatio" in result["all_row"].keys())
+        self.assertTrue("CombinedScore" in result["all_row"].keys())
         # Negative checks
         self.assertRaises(TypeError, pe.get_pathway_rows_from_data, "not_a_list", c_num_lab)
         data_missing = [1, "pathway R-12345", 0.01, 2.5, 3.0 ]
@@ -165,9 +172,22 @@ class TestPathwayEnrichment(unittest.TestCase):
         result = pe.enrich_clust(gene_set, self.meth_key, c_num_lab, gene_library, req_ses)
         self.assertTrue(isinstance(result, dict))
         self.assertIn("all_list", result)
-        self.assertIn("OR_list", result)
+        self.assertIn("or_list", result)
         self.assertIn("score_list", result)
         self.assertIn("user_list_id", result)
+        # Check that OR_list has the key "OddsRatio"
+        res_or_list = result["or_list"]
+        res_or_dict = res_or_list[0]
+        self.assertIn("OddsRatio", res_or_dict)
+        # Check that score_list have the key "CombinedScore"
+        res_score_list = result["score_list"]
+        res_score_dict = res_score_list[0]
+        self.assertIn("CombinedScore", res_score_dict)
+        # Check that all_list has the keys "OddsRatio" and "CombinedScore"
+        res_all_list = result["all_list"]
+        res_all_dict = res_all_list[0]
+        self.assertIn("OddsRatio", res_all_dict)
+        self.assertIn("CombinedScore", res_all_dict)
         # Negative checks
         self.assertRaises(TypeError, pe.enrich_clust,
                           gene_set = "not_a_list",
@@ -224,6 +244,13 @@ class TestPathwayEnrichment(unittest.TestCase):
         self.assertIn("or_df", result)
         self.assertIn("score_df", result)
         self.assertIn("all_df", result)
+        # Check that or_df has columns OddsRatio
+        self.assertTrue("OddsRatio" in result["or_df"].columns)
+        # Check that score_df has columns CombinedScore
+        self.assertTrue("CombinedScore" in result["score_df"].columns)
+        # Check that all_df has columns OddsRatio and CombinedScore
+        self.assertTrue("OddsRatio" in result["all_df"].columns)
+        self.assertTrue("CombinedScore" in result["all_df"].columns)
         # Negative checks
         self.assertRaises(TypeError, pe.enrich_method,
                   meth_key=123,
@@ -276,13 +303,17 @@ class TestPathwayEnrichment(unittest.TestCase):
 
         all_dict = {self.meth_key: pd.DataFrame({
             'path_id': ["path1", "path2"],
-            'pval': [1E-9, 1E-7]
+            'pval': [1E-9, 1E-7],
+            'OddsRatio': [0.1, 0.3],
+            'CombinedScore': [0.2, 0.6]
         })}
         or_dict = {self.meth_key: pd.DataFrame({
-            'path_id': ["path1", "path2"]
+            'path_id': ["path1", "path2"],
+            'OddsRatio': [0.1, 0.3]
         })}
         score_dict = {self.meth_key: pd.DataFrame({
-            'path_id': ["path1", "path2"]
+            'path_id': ["path1", "path2"],
+            'CombinedScore': [0.2, 0.6]
         })}
         result = pe.apply_p_filter(self.meth_key, all_dict, or_dict, score_dict)
         self.assertTrue(isinstance(result, dict))
@@ -313,7 +344,9 @@ class TestPathwayEnrichment(unittest.TestCase):
         # Check that the method key is in each dictionary
         invalid_dict = {"wrong_key": pd.DataFrame({
             'path_id': ["path1", "path2"],
-            'pval': [1E-9, 1E-7]
+            'pval': [1E-9, 1E-7],
+            'OddsRatio': [0.1, 0.3],
+            'CombinedScore': [0.2, 0.6]
         })}
         self.assertRaises(KeyError, pe.apply_p_filter,
               meth_key=self.meth_key,
@@ -333,7 +366,9 @@ class TestPathwayEnrichment(unittest.TestCase):
         # Check that the method key is in each dictionary
         invalid_no_path_id_dict = {self.meth_key: pd.DataFrame({
             'not_path': ["path1", "path2"],
-            'pval': [1E-9, 1E-7]
+            'pval': [1E-9, 1E-7],
+            'OddsRatio': [0.1, 0.3],
+            'CombinedScore': [0.2, 0.6]
         })}
         # Check that the path_id column is in the all_dict
         self.assertRaises(ValueError, pe.apply_p_filter,
@@ -356,14 +391,52 @@ class TestPathwayEnrichment(unittest.TestCase):
             # Check that the method key is in each dictionary
         invalid_no_pval_dict = {self.meth_key: pd.DataFrame({
             'path_id': ["path1", "path2"],
-            'not_pval': [1E-9, 1E-7]
+            'not_pval': [1E-9, 1E-7],
+            'OddsRatio': [0.1, 0.3],
+            'CombinedScore': [0.2, 0.6]
         })}
         # Check that the pval column is in the all_dict
         self.assertRaises(ValueError, pe.apply_p_filter,
               meth_key=self.meth_key,
               all_dict = invalid_no_pval_dict,
               or_dict = or_dict,
-              score_dict=all_dict)
+              score_dict= score_dict)
+        invalid_no_or_dict = {self.meth_key: pd.DataFrame({
+            'path_id': ["path1", "path2"],
+            'not_pval': [1E-9, 1E-7],
+            'not_or': [0.1, 0.3],
+            'CombinedScore': [0.2, 0.6]
+        })}
+        # Check that the or column is in the all_dict
+        self.assertRaises(KeyError, pe.apply_p_filter,
+              meth_key=self.meth_key,
+              all_dict = all_dict,
+              or_dict = invalid_no_or_dict,
+              score_dict= score_dict)
+        # Check that the or column is in or_dict
+        self.assertRaises(KeyError, pe.apply_p_filter,
+              meth_key=self.meth_key,
+              all_dict = invalid_no_or_dict,
+              or_dict = or_dict,
+              score_dict= score_dict)
+        invalid_no_score_dict = {self.meth_key: pd.DataFrame({
+            'path_id': ["path1", "path2"],
+            'not_pval': [1E-9, 1E-7],
+            'OddsRatio': [0.1, 0.3],
+            'not_score': [0.2, 0.6]
+        })}
+        # Check that the or column is in the all_dict
+        self.assertRaises(KeyError, pe.apply_p_filter,
+              meth_key=self.meth_key,
+              all_dict = all_dict,
+              or_dict = or_dict,
+              score_dict= invalid_no_score_dict)
+        # Check that the or column is in or_dict
+        self.assertRaises(KeyError, pe.apply_p_filter,
+              meth_key=self.meth_key,
+              all_dict = all_dict,
+              or_dict = or_dict,
+              score_dict= invalid_no_score_dict)
 
     def test_remove_paths_children(self):
         """

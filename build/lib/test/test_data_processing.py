@@ -18,6 +18,7 @@ import random as rnd
 
 import unittest
 import pandas as pd
+import numpy as np
 
 from multitraitclustering import data_setup as ds
 from multitraitclustering import data_processing as dp
@@ -465,6 +466,26 @@ class TestDataProcessing(unittest.TestCase):
             membership=membership_ser.iloc[0:-5],
         )
 
+    def test_long_df_from_p_cnum_arr(self):
+        """Test the conversion of a matrix to a long format DataFrame."""
+        # Create a sample matrix and label dictionaries
+        a_mat = np.array([[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]])
+        row_lab_dict = {0: "pathway_1", 1: "pathway_2"}
+        col_lab_dict = {0: "cluster_1", 1: "cluster_2", 2: "cluster_3"}
+        score_lab = "score"
+        # Call the function
+        long_df = dp.long_df_from_p_cnum_arr(
+            a_mat, row_lab_dict, col_lab_dict, score_lab
+        )
 
+        # Assert that the output is a DataFrame
+        self.assertIsInstance(long_df, pd.DataFrame)
+
+        # Assert that the DataFrame has the correct columns
+        expected_columns = ["pathway", "ClusterNumber", "score"]
+        self.assertListEqual(list(long_df.columns), expected_columns)
+
+        # Assert that the DataFrame has the correct number of rows
+        self.assertEqual(long_df.shape[0], 6)
 if __name__ == "__main__":
     unittest.main()
