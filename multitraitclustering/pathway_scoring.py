@@ -4,15 +4,17 @@ Description: Functions for scoring how well clusters correspond to biological pa
 Type: Analysis
 Created: 5th February 2025
 """
+
+import operator
 import numpy as np
 import pandas as pd
 
 def ssd(a_mat, b_mat):
-    """Computes the sum of absolute differences between two matrices, normalized by the number of elements.
+    """Compute sum of absolute differences between matrices, normalized by the no. of elements.
 
     Args:
-        a_mat (np.ndarray): The first matrix of scores. Rows represent pathways, and columns represent clusters.
-        b_mat (np.ndarray): The second matrix of scores, with the same structure as a_mat.
+        a_mat (np.ndarray): first matrix of scores. Rows represent pathways, and columns clusters.
+        b_mat (np.ndarray): second matrix of scores, with the same structure as a_mat.
 
     Returns:
         float: The sum of absolute differences between the elements of the two matrices, divided by the total number of elements.
@@ -71,10 +73,10 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     # Verify Columns Labels
     if "pathway" not in df.columns:
         error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     if "ClusterNumber" not in df.columns:
         error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     # Verify axis is either 0 or 1
     if not (axis == 0 or axis == 1):
         error_string = f"""axis can only be 0 or 1 not {axis}"""
@@ -82,7 +84,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     # Verify score_lab is a valid column
     if score_lab not in df.columns:
         error_str = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_str)
+        raise KeyError(error_str)
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     if df_wide.shape[1]==1 and axis ==1:
         return "NaN"
@@ -104,7 +106,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     score = redirect_score(ssd(max_mat, mat_norm))
     return score
 
-def assign_max_and_crop(mat):
+def assign_max_and_crop(mat, ignore_cols = None):
     """Assign each column to its maximum row, cropping duplicates.
 
     For each column in the input matrix, identify the row with the maximum value.
@@ -124,25 +126,30 @@ def assign_max_and_crop(mat):
     Raises:
         TypeError: If `mat` is not a numpy array.
     """
-    mat = np.nan_to_num(mat)
-    mat = np.nan_to_num(mat)
     # Verify Types
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
         raise TypeError(error_string)
+    if ignore_cols is None:
+        ignore_cols = []
+    mat = np.nan_to_num(mat)
     out_mat = np.zeros(mat.shape)
     # Initialise - For each column get the row with the highest score
     positions = np.argmax(mat, axis = 0)
-    # Are any of the rows repeated?
-    unique_ps, counts = np.unique(positions, return_counts = True)
+    pos_dict = {c: pos for c, pos in enumerate(positions) if c not in ignore_cols}
     # Number of unique rows found
-    nu = len(unique_ps)
-    # All rows with count > 1 need to be assessed
-    reassign_ps = [unique_ps[i] for i in range(nu) if counts[i] > 1]
-    # All rows with count 1 can be fixed
-    fixed_ps = [unique_ps[i] for i in range(nu) if counts[i] == 1]
-    # Fix the columns for the fixed rows.
-    col_pairs = [np.where(positions==p)[0][0] for p in fixed_ps]
+    reassign_ps = []
+    fixed_ps = []
+    col_pairs = []
+    for c in pos_dict.keys():
+        count = operator.countOf(pos_dict.values(), pos_dict[c])
+        # if position is there multiple times put in reassign
+        # If position is there once store in unique and store c in col_pairs
+        if count > 1:
+            reassign_ps += [pos_dict[c]]
+        else:
+            fixed_ps += [pos_dict[c]]
+            col_pairs += [c]
     # Which rows can still be considered?
     # Note this will consider rows fixed on previous iterations but their values
     # will be zero from the cropping so they shouldn't get picked up
@@ -152,17 +159,18 @@ def assign_max_and_crop(mat):
     for p in reassign_ps:
         cols = np.where(positions == p)[0]
         max_col = cols[np.argmax(mat[p, cols])]
-        cols_not_max = cols[cols != max_col]
-        consider_rows.remove(p)
         fixed_ps += [p]
         col_pairs += [max_col]
-        out_mat[consider_rows, cols_not_max] = mat[consider_rows, cols_not_max]
+    consider_cols = [c for c in range(mat.shape[1]) if c not in col_pairs]
+    consider_rows = [c for c in range(mat.shape[0]) if c not in fixed_ps]
+    out_mat[consider_rows, :] = mat[consider_rows, :]
+    out_mat[:, consider_cols] = mat[:, consider_cols]
     out_dict = {"fixed_positions": fixed_ps,
                 "col_pairs": col_pairs,
                 "out_mat": out_mat}
     return out_dict
 
-def overall_paths(df, score_lab = "combined_score"):
+def overall_paths(df, score_lab = "CombinedScore"):
     """
     overall_paths Score for how well clusters identify pathways
     
@@ -176,14 +184,12 @@ def overall_paths(df, score_lab = "combined_score"):
     The score is the ssd between the cropped data and the ideal matrix
 
     Args:
-        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `combined_score`.
-        score_lab (str, optional): col label for score, defaults to "combined_score"
+        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `CombinedScore`.
+        score_lab (str, optional): col label for score, defaults to "CombinedScore"
     
     Raise:
         TypeError: df not a pandas dataframe
-        ValueError: pathway not in df columns
-        ValueError: ClusterNumber not in df columns
-        ValueError: score_lab not in df columns
+        KeyError: pathway, ClusterNumber or score_lab not in df columns
 
     Returns:
         score (float)
@@ -195,19 +201,20 @@ def overall_paths(df, score_lab = "combined_score"):
     # Verify Columns Labels
     if "pathway" not in df.columns:
         error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     if "ClusterNumber" not in df.columns:
         error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     # Verify score_lab is a valid column
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Compute the best match matrix and get the corresponding indexes
     best_mat_out= path_best_matches(df, score_lab=score_lab)
-    crop_mat = best_mat_out["best_mat"]
+    crop_df = best_mat_out["best_df"].pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
+    crop_mat = np.nan_to_num(crop_df.to_numpy())
     rows = best_mat_out["row_positions"]
     cols = best_mat_out["col_pairs"]
     # Compute the overall score using the best match matrix
@@ -246,7 +253,7 @@ def redirect_score(score):
         r_score = 1/(0.01+score)
     return r_score
 
-def path_best_matches(df, score_lab = "combined_score"):
+def path_best_matches(df, score_lab = "CombinedScore"):
     """
     overall_paths Score for how well clusters identify pathways
     
@@ -264,18 +271,16 @@ def path_best_matches(df, score_lab = "combined_score"):
     The score is the ssd between the cropped data and the ideal matrix
 
     Args:
-        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `combined_score`.
-        score_lab (str, optional): col label for score, defaults to "combined_score"
+        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `CombinedScore`.
+        score_lab (str, optional): col label for score, defaults to "CombinedScore"
     
     Raise:
         TypeError: df not a pandas dataframe
-        ValueError: pathway not in df columns
-        ValueError: ClusterNumber not in df columns
-        ValueError: score_lab not in df columns
+        KeyError: pathway, ClusterNumber of score_labe not in df columns
 
     Returns:
         out_dict (dict):
-        * "best_mat" (np.ndarray) best matches array
+        * "best_df" (pd.DataFrame): best matches dataframe
         * "row_positions" (list) the rows for the best matches
         * "col_pairs" (list) the columns paired with the rows
     """
@@ -286,14 +291,14 @@ def path_best_matches(df, score_lab = "combined_score"):
     # Verify Columns Labels
     if "pathway" not in df.columns:
         error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     if "ClusterNumber" not in df.columns:
         error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     # Verify score_lab is a valid column
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
 
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
@@ -329,8 +334,7 @@ def path_best_matches(df, score_lab = "combined_score"):
                  "col_pairs": col_pairs}
     return best_dict
 
-# TODO #17 test pathway scoring. Separation score should not be returning so many NaNs
-def clust_path_score(df, score_lab = "combined_score"):
+def clust_path_score(df, score_lab = "CombinedScore"):
     """ Generate the three different pathway scores for a cluster results dataframe.
         Args:
             df (pd.DataFrame): DataFrame containing the cluster results.
@@ -346,14 +350,14 @@ def clust_path_score(df, score_lab = "combined_score"):
     # Verify Columns Labels
     if "pathway" not in df.columns:
         error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     if "ClusterNumber" not in df.columns:
         error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     # Verify score_lab is a valid column
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
-        raise ValueError(error_string)
+        raise KeyError(error_string)
     path_contain_score = uniqueness(df, axis = 0, score_lab = score_lab)
     path_separate_score = uniqueness(df, axis = 1, score_lab = score_lab)
     path_overall_score = overall_paths(df, score_lab = score_lab)
