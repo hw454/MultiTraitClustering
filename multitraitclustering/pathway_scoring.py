@@ -4,9 +4,11 @@ Description: Functions for scoring how well clusters correspond to biological pa
 Type: Analysis
 Created: 5th February 2025
 """
+
+import operator
+
 import numpy as np
 import pandas as pd
-import operator
 
 def ssd(a_mat, b_mat):
     """
@@ -121,6 +123,8 @@ def assign_max_and_crop(mat, ignore_cols = None):
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
         raise TypeError(error_string)
+    if ignore_cols is None:
+        ignore_cols = []
     out_mat = np.zeros(mat.shape)
     # Initialise - For each column get the row with the highest score
     positions = np.argmax(mat, axis = 0)
@@ -294,7 +298,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
-   
+
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
     # Get the row number for the maximum in each column
@@ -323,6 +327,7 @@ def path_best_matches(df, score_lab = "combined_score"):
                            value_name= score_lab,
                            ignore_index = False
     )
+    best_df.reset_index(names = ['pathway'], inplace = True)
     best_dict = {"best_df": best_df,
                  "row_positions": positions,
                  "col_pairs": col_pairs}
