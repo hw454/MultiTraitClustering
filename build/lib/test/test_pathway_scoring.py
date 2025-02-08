@@ -211,46 +211,44 @@ class TestPathwayScoring(unittest.TestCase):
         Raises:
             AssertionError: If clust_path_Score fails the tests
         """
-        # * Identity matrix should score minimum. (A4)
-        # * Permuted identity should also score minimum. (A1)
-        # * Identity + Grey squares should score minimum + grey values * number of grey squares. (A2)
+        # Known value checks
+        # * Identity matrix should score 0. (A4)
+        # * Permuted identity should also score 0. (A1)
+        # * Identity + Grey squares should score
+        #   no. grey values * number of grey squares/ nsqs**2 (A2)
         # * Constant matrix should score maximum. (A0)
         nsq=6
         grey_val = 0.5
         n_grey = 2
         # Create the test data
-        A0 = grey_val * np.ones((nsq,nsq))
-        A4 = np.eye(nsq)
-        A1 = A4.copy()
-        A1[:,0:3] = A4[:,1:4]
-        A1[:,3] = A4[:,0]
-        A1[:,4] = A4[:,5]
-        A1[:,5] = A4[:,4]
-        A2 = A1.copy()
-        A2[5,3] = grey_val
-        A2[4,4] = grey_val
+        a0 = grey_val * np.ones((nsq,nsq))
+        a4 = np.eye(nsq)
+        a1 = a4.copy()
+        a1[:,0:3] = a4[:,1:4]
+        a1[:,3] = a4[:,0]
+        a1[:,4] = a4[:,5]
+        a1[:,5] = a4[:,4]
+        a2 = a1.copy()
+        a2[5,3] = grey_val
+        a2[4,4] = grey_val
 
         # Set the expected values
         e0 = grey_val * (nsq-1)/nsq 
         e1 = 0
         e2 = grey_val * n_grey / (nsq**2)
         e3 = 0
-        col_lab_dict = {i:f"c{i}" for i in range(A0.shape[1])}
-        row_lab_dict = {i:f"p{i}" for i in range(A0.shape[0])}
+        col_lab_dict = {i:f"c{i}" for i in range(a0.shape[1])}
+        row_lab_dict = {i:f"p{i}" for i in range(a0.shape[0])}
         # Create a long form data_frame from matrix
         expec = [e0, e1, e2, e3]
         re_expec = [ps.redirect_score(e) for e in expec]
-        for i, A in enumerate([A0]):#, A1, A2, A4]):
-            a_df = dp.long_df_from_p_cnum_arr(A,
+        # TODO #40 pathway score not getting expected values.
+        for i, a_mat in enumerate([a0]): #, a1, a2, a4]):
+            a_df = dp.long_df_from_p_cnum_arr(a_mat,
                                     row_lab_dict=row_lab_dict,
                                     col_lab_dict=col_lab_dict,
                                     score_lab="CombinedScore")
-            print("in")
-            a_matches = ps.path_best_matches(a_df, "CombinedScore")
-            #print(a_matches)
             p_scores = ps.clust_path_score(a_df, score_lab="CombinedScore")
-            print("outs")
-            print(p_scores, re_expec[i], i, A)
             self.assertTrue(p_scores["OverallPathway"]==re_expec[i])
         npoints = 300
         nclusts = 6
