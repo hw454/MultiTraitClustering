@@ -125,6 +125,7 @@ def assign_max_and_crop(mat):
         TypeError: If `mat` is not a numpy array.
     """
     mat = np.nan_to_num(mat)
+    mat = np.nan_to_num(mat)
     # Verify Types
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
@@ -302,20 +303,29 @@ def path_best_matches(df, score_lab = "combined_score"):
     # Construct matrix of ones in these positions - this is the ideal matrix.
     # Find the sum of the square difference between the cropped matrix and the ideal matrix
     #-----------------
-    positions = []
+    fixed_ps = []
     col_pairs = []
     out_mat = mat.copy()
     for _ in range(mat.shape[1]):
         # Max number of iterations is the number of columns
         out_dict = assign_max_and_crop(out_mat)
-        positions += out_dict["fixed_positions"]
+        fixed_ps += out_dict["fixed_positions"]
         col_pairs += out_dict["col_pairs"]
         out_mat = out_dict["out_mat"]
-        if len(positions) >= mat.shape[1]:
+        if len(fixed_ps) >= mat.shape[1]:
             break
-    crop_mat = mat[positions, :]
-    best_dict = {"best_mat": crop_mat,
-                 "row_positions": positions,
+    crop_mat = mat[fixed_ps, :]
+    crop_df = pd.DataFrame(index=df_wide.index[fixed_ps],
+                           data = crop_mat,
+                           columns=df_wide.columns[col_pairs])
+    best_df = crop_df.melt(value_vars = crop_df.columns,
+                           var_name = "ClusterNumber",
+                           value_name= score_lab,
+                           ignore_index = False
+    )
+    best_df.reset_index(names = ['pathway'], inplace = True)
+    best_dict = {"best_df": best_df,
+                 "row_positions": fixed_ps,
                  "col_pairs": col_pairs}
     return best_dict
 
