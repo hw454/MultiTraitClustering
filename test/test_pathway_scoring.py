@@ -175,7 +175,7 @@ class TestPathwayScoring(unittest.TestCase):
         # Check output is dict
         self.assertTrue(isinstance(best_out, dict))
         # Check types of the terms in the dict
-        self.assertTrue(isinstance(best_out["best_mat"], np.ndarray))
+        self.assertTrue(isinstance(best_out["best_df"], pd.DataFrame))
         self.assertTrue(isinstance(best_out["row_positions"], list))
         self.assertTrue(isinstance(best_out["col_pairs"], list))
         # ---------------------
