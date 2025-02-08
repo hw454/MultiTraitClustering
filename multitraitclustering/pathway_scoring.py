@@ -305,7 +305,7 @@ def path_best_matches(df, score_lab = "combined_score"):
     out_mat = mat.copy()
     for _ in range(mat.shape[1]):
         # Max number of iterations is the number of columns
-        out_dict = assign_max_and_crop(out_mat)
+        out_dict = assign_max_and_crop(out_mat, ignore_cols=col_pairs)
         positions += out_dict["fixed_positions"]
         col_pairs += out_dict["col_pairs"]
         out_mat = out_dict["out_mat"]
