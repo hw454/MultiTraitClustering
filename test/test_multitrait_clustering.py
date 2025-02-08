@@ -180,6 +180,16 @@ class TestMultiTraitClustering(unittest.TestCase):
         )
 
     def test_cluster_all_methods(self):
+        """
+        Test the cluster_all_methods function.
+        This test checks the following:
+            - The output is a dictionary with a dataframe and dictionary.
+            - The keys for the clust_pars_dict match the columns for clust_df.
+            - TypeErrors are raised when the input is not a dataframe.
+            - ValueError is raised when the number of dimensions doesn't match.
+            - KeyError is raised when the exp_df doesn't contain a column named EXP.
+        """
+
         data = dm.load_association_data(
             path_dir="./data/TestData/",
             eff_fname="unstdBeta_df.csv",
@@ -227,7 +237,18 @@ class TestMultiTraitClustering(unittest.TestCase):
             exp_df=data["exp_df"],
             assoc_df=dummy_assoc_df.iloc[0:-2, :],
         )
-
+        # KeyError when the exp_df doesn't contain a column named EXP
+        exp_wrong_col = data["exp_df"].rename(
+            columns = {
+                data["exp_df"][0]: "invalid"
+                }
+            )
+        self.assertRaises(
+            KeyError,
+            mtc.cluster_all_methods,
+            exp_df=exp_wrong_col,
+            assoc_df=data["eff_df"],
+        )
 
 if __name__ == "__main__":
     unittest.main()

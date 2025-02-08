@@ -245,12 +245,7 @@ class TestPathwayScoring(unittest.TestCase):
                                     row_lab_dict=row_lab_dict,
                                     col_lab_dict=col_lab_dict,
                                     score_lab="CombinedScore")
-            print("in")
-            a_matches = ps.path_best_matches(a_df, "CombinedScore")
-            #print(a_matches)
             p_scores = ps.clust_path_score(a_df, score_lab="CombinedScore")
-            print("outs")
-            print(p_scores, re_expec[i], i, A)
             self.assertTrue(p_scores["OverallPathway"]==re_expec[i])
         npoints = 300
         nclusts = 6

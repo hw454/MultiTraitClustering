@@ -143,7 +143,7 @@ def chart_clusters_multi(
         chart_dict[col2] = (
             alt.Chart(data, title=title)
             .mark_circle(size=60)
-            .encode(x=col1, y=col2, color=color_var, tooltip=tooltip)
+            .encode(x=col1, y=col2, color=color_var + ":N", tooltip=tooltip)
         )
     return chart_dict
 
@@ -340,5 +340,38 @@ def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
             ),
         )
         .interactive()
+    )
+    return chart
+
+
+def overlap_bars(df, xlab, ylab, group_lab, sep_lab, title):
+    """Generates an Altair bar chart with overlapping bars, faceted by group.
+
+        Args:
+            df (pd.DataFrame): The input DataFrame containing the data to plot.
+            xlab (str): name of col in DataFrame for the x-axis, categorical data.
+            ylab (str): name of col in DataFrame for the y-axis, quantitative data.
+            group_lab (str): name of col in DataFrame for faceting the chart into groups, categorical data.
+            sep_lab (str): name of col in DataFrame to separate bars within groups (color), categorical data.
+            title (str): The title of the chart.
+
+        Returns:
+            alt.Chart: An Altair chart object representing the overlapping bar chart.  The x-axis labels are hidden.  The column headers are rotated and aligned for better readability.
+        """
+    chart = (
+        alt.Chart(df, title=title)
+        .mark_bar()
+        .encode(
+            x=alt.X(xlab + ":N", axis=alt.Axis(labels=False), title=None),
+            y=ylab + ":Q",
+            color=alt.Color(sep_lab + ":N", title=None),
+            column=alt.Column(
+                group_lab + ":N",
+                header=alt.Header(
+                    labelAngle=-90, orient="top", labelOrient="top", labelAlign="right"
+                ),
+                title=None,
+            ),
+        )
     )
     return chart
