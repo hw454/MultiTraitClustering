@@ -4,22 +4,22 @@ Description: Functions for scoring how well clusters correspond to biological pa
 Type: Analysis
 Created: 5th February 2025
 """
-
-import operator
-
 import numpy as np
 import pandas as pd
 
 def ssd(a_mat, b_mat):
-    """
-    ssd Sum of the absolute difference divided by the number of terms.
+    """Computes the sum of absolute differences between two matrices, normalized by the number of elements.
 
-    :param a_mat: Array of scores. Rows are pathways, columns are clusters
-    :type a_mat: np.ndarray
-    :param b_mat: Array of scores. Rows are pathways, columns are clusters
-    :type b_mat: np.ndarray
-    :return: Absolute value of pointwise difference divided by the number of terms.
-    :rtype: float
+    Args:
+        a_mat (np.ndarray): The first matrix of scores. Rows represent pathways, and columns represent clusters.
+        b_mat (np.ndarray): The second matrix of scores, with the same structure as a_mat.
+
+    Returns:
+        float: The sum of absolute differences between the elements of the two matrices, divided by the total number of elements.
+
+    Raises:
+        TypeError: If either `a_mat` or `b_mat` is not a numpy array.
+        ValueError: If `a_mat` and `b_mat` have different shapes.
     """
     # Verify input types
     if not isinstance(a_mat, np.ndarray):
@@ -42,20 +42,24 @@ def ssd(a_mat, b_mat):
     return abs(dif).sum()/(len(a_mat.ravel()))
 
 def uniqueness(df, axis = 0, score_lab = "combined_score"):
-    """
-    uniqueness estimate how close to unique columns/rows the data in df is.
+    """Estimates how close to unique columns/rows the data in df is.
 
-    df rows are pathways and columns are clusters. Uniqueness describes how well
+    DF rows are pathways and columns are clusters. Uniqueness describes how well
     the clusters have identified a unique pathway (pathway containment, axis = 0),
-    or how well the clusters have stopped pathways being split across clusters 
+    or how well the clusters have stopped pathways being split across clusters
     (pathway separation, axis =1).
 
-    :param df: Cluster-Pathway results. rows are pathways and columns are clusters
-    :type df: pd.DataFrame
-    :param axis: Integer for axis to test on. 0 for rows, 1 for columns, defaults to 0
-    :type axis: int, optional
-    :param score_lab: col label for data pairing cluster and pathway, defaults "combined_score"
-    :type score_lab: str, optional
+    Args:
+        df (pd.DataFrame): Cluster-Pathway results. Rows are pathways and columns are clusters.
+        axis (int, optional): Integer for axis to test on. 0 for rows, 1 for columns. Defaults to 0.
+        score_lab (str, optional): Col label for data pairing cluster and pathway. Defaults to "combined_score".
+
+    Returns:
+        float: A score representing the uniqueness. Returns "NaN" if axis is 1 and the number of columns of df_wide is 1.
+
+    Raises:
+        TypeError: If `df` is not a pandas DataFrame, `axis` is not an integer, or `score_lab` is not a string.
+        ValueError: If `pathway` or `ClusterNumber` are not columns in `df`, `axis` is not 0 or 1, or `score_lab` is not a valid column in `df`.
     """
     # Verify Input Types
     if not isinstance(df, pd.DataFrame):
@@ -100,48 +104,44 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     score = redirect_score(ssd(max_mat, mat_norm))
     return score
 
-def assign_max_and_crop(mat, ignore_cols = None):
+def assign_max_and_crop(mat):
+    """Assign each column to its maximum row, cropping duplicates.
+
+    For each column in the input matrix, identify the row with the maximum value.
+    If a row is the maximum for multiple columns, assign it to the column where its value is greatest.
+    The function then "crops" the matrix by setting the values in the fixed rows and columns to zero,
+    effectively removing them from consideration in subsequent iterations.
+
+    Args:
+        mat (np.ndarray): The input data matrix.
+
+    Returns:
+        dict: A dictionary containing the following keys:
+            - "fixed_positions" (list): A list of the indices of the rows that were uniquely assigned to a column.
+            - "col_pairs" (list): A list of the indices of the columns that were paired with the fixed rows.
+            - "out_mat" (np.ndarray): The cropped matrix, with the fixed rows and columns set to zero.
+
+    Raises:
+        TypeError: If `mat` is not a numpy array.
     """
-    assign_max_and_crop Fix row with max for each col. Crop data left from duplicates
-
-    Fix the rows which are the maximum for only one column.
-
-    Rows which are the maximum for multiple columns are assigned to the column with the
-    largest value.
-
-    The matrix is returned with the fixed rows and columns set to zero.
-
-    :param mat: Original data matrix
-    :type mat: np.ndarray
-    :param out_mat:
-    :return: `fixed_positions` - the fixed rows, 
-             `col_pairs` - their paired columns,
-             `out_mat` - the cropped matrix
-    :rtype: dict
-    """
+    mat = np.nan_to_num(mat)
     # Verify Types
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
         raise TypeError(error_string)
-    if ignore_cols is None:
-        ignore_cols = []
     out_mat = np.zeros(mat.shape)
     # Initialise - For each column get the row with the highest score
     positions = np.argmax(mat, axis = 0)
-    pos_dict = {c: pos for c, pos in enumerate(positions) if c not in ignore_cols}
+    # Are any of the rows repeated?
+    unique_ps, counts = np.unique(positions, return_counts = True)
     # Number of unique rows found
-    reassign_ps = []
-    fixed_ps = []
-    col_pairs = []
-    for c in pos_dict.keys():
-        count = operator.countOf(pos_dict.values(), pos_dict[c])
-        # if position is there multiple times put in reassign
-        # If position is there once store in unique and store c in col_pairs
-        if count > 1:
-            reassign_ps += [pos_dict[c]]
-        else:
-            fixed_ps += [pos_dict[c]]
-            col_pairs += [c]
+    nu = len(unique_ps)
+    # All rows with count > 1 need to be assessed
+    reassign_ps = [unique_ps[i] for i in range(nu) if counts[i] > 1]
+    # All rows with count 1 can be fixed
+    fixed_ps = [unique_ps[i] for i in range(nu) if counts[i] == 1]
+    # Fix the columns for the fixed rows.
+    col_pairs = [np.where(positions==p)[0][0] for p in fixed_ps]
     # Which rows can still be considered?
     # Note this will consider rows fixed on previous iterations but their values
     # will be zero from the cropping so they shouldn't get picked up
@@ -151,12 +151,11 @@ def assign_max_and_crop(mat, ignore_cols = None):
     for p in reassign_ps:
         cols = np.where(positions == p)[0]
         max_col = cols[np.argmax(mat[p, cols])]
+        cols_not_max = cols[cols != max_col]
+        consider_rows.remove(p)
         fixed_ps += [p]
         col_pairs += [max_col]
-    consider_cols = [c for c in range(mat.shape[1]) if c not in col_pairs]
-    consider_rows = [c for c in range(mat.shape[0]) if c not in fixed_ps]
-    out_mat[consider_rows, :] = mat[consider_rows, :]
-    out_mat[:, consider_cols] = mat[:, consider_cols]
+        out_mat[consider_rows, cols_not_max] = mat[consider_rows, cols_not_max]
     out_dict = {"fixed_positions": fixed_ps,
                 "col_pairs": col_pairs,
                 "out_mat": out_mat}
@@ -207,17 +206,12 @@ def overall_paths(df, score_lab = "combined_score"):
     mat = np.nan_to_num(df_wide.to_numpy())
     # Compute the best match matrix and get the corresponding indexes
     best_mat_out= path_best_matches(df, score_lab=score_lab)
-    crop_df = best_mat_out["best_df"]
-    crop_mat = pd.pivot(crop_df,
-                        columns = ["ClusterNumber"],
-                        index = 'pathway',
-                        values = score_lab).to_numpy()
+    crop_mat = best_mat_out["best_mat"]
     rows = best_mat_out["row_positions"]
     cols = best_mat_out["col_pairs"]
     # Compute the overall score using the best match matrix
     ideal_mat = np.zeros(mat.shape)
-    for c in cols:
-        ideal_mat[rows, c] = mat[rows, c]
+    ideal_mat[rows, cols] = mat[rows, cols]
     ideal_mat = ideal_mat[rows,:]
     score = redirect_score(ssd(crop_mat, ideal_mat))
     return score
@@ -313,23 +307,14 @@ def path_best_matches(df, score_lab = "combined_score"):
     out_mat = mat.copy()
     for _ in range(mat.shape[1]):
         # Max number of iterations is the number of columns
-        out_dict = assign_max_and_crop(out_mat, ignore_cols=col_pairs)
+        out_dict = assign_max_and_crop(out_mat)
         positions += out_dict["fixed_positions"]
         col_pairs += out_dict["col_pairs"]
         out_mat = out_dict["out_mat"]
         if len(positions) >= mat.shape[1]:
             break
     crop_mat = mat[positions, :]
-    crop_df = pd.DataFrame(index=df_wide.index[positions],
-                           data = crop_mat,
-                           columns=df_wide.columns[col_pairs])
-    best_df = crop_df.melt(value_vars = crop_df.columns,
-                           var_name = "ClusterNumber",
-                           value_name= score_lab,
-                           ignore_index = False
-    )
-    best_df.reset_index(names = ['pathway'], inplace = True)
-    best_dict = {"best_df": best_df,
+    best_dict = {"best_mat": crop_mat,
                  "row_positions": positions,
                  "col_pairs": col_pairs}
     return best_dict
