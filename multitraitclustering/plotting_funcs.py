@@ -87,6 +87,7 @@ def chart_clusters_multi(
 
     This function iterates through a list of columns, creating a scatter plot for each column
     against a fixed x-axis. The plots are colored according to a specified variable,
+
     typically cluster assignments.
 
     Args:
@@ -95,11 +96,11 @@ def chart_clusters_multi(
         color_var (str): Label for the variable to group colors by.
         tooltip (list): List of labels for data to show when hovered.
         xcol (str, optional): Label for fixed x column. Defaults to first column in the data.
-        col_list (list, optional): List of columns for the y-axis. Defaults to [].
+        col_list (list, optional): List of columns for the y-axis. Defaults to None.
 
     Returns:
         dict: A dictionary where keys are column names from `col_list` and values are
-        corresponding Altair chart objects.
+          corresponding Altair chart objects.
     """
     # Input checks
     if not isinstance(data, pd.DataFrame):
@@ -342,3 +343,4 @@ def pathway_bars(df, xlab, ylab, group_lab, max_val, title):
         .interactive()
     )
     return chart
+
