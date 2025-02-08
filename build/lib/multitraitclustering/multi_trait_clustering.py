@@ -198,7 +198,7 @@ def cluster_all_methods(exp_df, assoc_df):
         raise TypeError(error_string)
     if "EXP" not in exp_df.columns:
         error_string = f"""There must be a columns named EXP in exp_df.
-            Avilable columns: {exp_df.columns}"""
+            Available columns: {exp_df.columns}"""
         raise KeyError(error_string)
     if assoc_df.shape[0] != exp_df.shape[0]:
         error_string = f"""no. of points in assoc_df is {assoc_df.shape[0]} mismatch with
