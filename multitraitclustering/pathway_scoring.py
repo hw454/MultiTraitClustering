@@ -97,7 +97,7 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
     score = redirect_score(ssd(max_mat, mat_norm))
     return score
 
-def assign_max_and_crop(mat):
+def assign_max_and_crop(mat, ignore_cols = None):
     """
     assign_max_and_crop Fix row with max for each col. Crop data left from duplicates
 
@@ -116,7 +116,6 @@ def assign_max_and_crop(mat):
              `out_mat` - the cropped matrix
     :rtype: dict
     """
-    mat = np.nan_to_num(mat)
     # Verify Types
     if not isinstance(mat, np.ndarray):
         error_string = f"mat should be numpy array not {type(mat)}"
@@ -124,16 +123,20 @@ def assign_max_and_crop(mat):
     out_mat = np.zeros(mat.shape)
     # Initialise - For each column get the row with the highest score
     positions = np.argmax(mat, axis = 0)
-    # Are any of the rows repeated?
-    unique_ps, counts = np.unique(positions, return_counts = True)
+    pos_dict = {c: pos for c, pos in enumerate(positions) if c not in ignore_cols}
     # Number of unique rows found
-    nu = len(unique_ps)
-    # All rows with count > 1 need to be assessed
-    reassign_ps = [unique_ps[i] for i in range(nu) if counts[i] > 1]
-    # All rows with count 1 can be fixed
-    fixed_ps = [unique_ps[i] for i in range(nu) if counts[i] == 1]
-    # Fix the columns for the fixed rows.
-    col_pairs = [np.where(positions==p)[0][0] for p in fixed_ps]
+    reassign_ps = []
+    fixed_ps = []
+    col_pairs = []
+    for c in pos_dict.keys():
+        count = operator.countOf(pos_dict.values(), pos_dict[c])
+        # if position is there multiple times put in reassign
+        # If position is there once store in unique and store c in col_pairs
+        if count > 1:
+            reassign_ps += [pos_dict[c]]
+        else:
+            fixed_ps += [pos_dict[c]]
+            col_pairs += [c]
     # Which rows can still be considered?
     # Note this will consider rows fixed on previous iterations but their values
     # will be zero from the cropping so they shouldn't get picked up
@@ -143,11 +146,12 @@ def assign_max_and_crop(mat):
     for p in reassign_ps:
         cols = np.where(positions == p)[0]
         max_col = cols[np.argmax(mat[p, cols])]
-        cols_not_max = cols[cols != max_col]
-        consider_rows.remove(p)
         fixed_ps += [p]
         col_pairs += [max_col]
-        out_mat[consider_rows, cols_not_max] = mat[consider_rows, cols_not_max]
+    consider_cols = [c for c in range(mat.shape[1]) if c not in col_pairs]
+    consider_rows = [c for c in range(mat.shape[0]) if c not in fixed_ps]
+    out_mat[consider_rows, :] = mat[consider_rows, :]
+    out_mat[:, consider_cols] = mat[:, consider_cols]
     out_dict = {"fixed_positions": fixed_ps,
                 "col_pairs": col_pairs,
                 "out_mat": out_mat}
@@ -285,9 +289,11 @@ def path_best_matches(df, score_lab = "combined_score"):
     if score_lab not in df.columns:
         error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
         raise ValueError(error_string)
-
+   
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     mat = np.nan_to_num(df_wide.to_numpy())
+    print(mat.shape)
+    print(df.ClusterNumber.unique())
     # Get the row number for the maximum in each column
     # For any repeated row numbers get the row number of the second highest
     # Repeat until square matrix (Cropped matrix)
@@ -306,7 +312,15 @@ def path_best_matches(df, score_lab = "combined_score"):
         if len(positions) >= mat.shape[1]:
             break
     crop_mat = mat[positions, :]
-    best_dict = {"best_mat": crop_mat,
+    crop_df = pd.DataFrame(index=df_wide.index[positions],
+                           data = crop_mat,
+                           columns=df_wide.columns[col_pairs])
+    best_df = crop_df.melt(value_vars = crop_df.columns,
+                           var_name = "ClusterNumber",
+                           value_name= score_lab,
+                           ignore_index = False
+    )
+    best_dict = {"best_df": best_df,
                  "row_positions": positions,
                  "col_pairs": col_pairs}
     return best_dict
