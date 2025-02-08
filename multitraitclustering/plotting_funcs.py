@@ -157,8 +157,8 @@ def chart_cluster_compare(
         data_array (numpy array): Comparison data - long form -
             x_lab (clust_no. for method 1), y_lab (clust_no for method 2),
             z_lab - no. in intersection/ no. in union
-        xlabels (list of strings): Cluster labels for the columns
-        ylabels (list of strings): Cluster labels for the rows
+        xlabels (list of strings or array of numbers): Cluster labels for the columns
+        ylabels (list of strings or array of numbers): Cluster labels for the rows
         x_lab (string): Label to get the x data from
         y_lab (string): Label to get the y data from
         z_lab (string): Label for the column containing the overlap percentage
@@ -170,10 +170,10 @@ def chart_cluster_compare(
     # Input Checks
     if not isinstance(data_array, np.ndarray):
         raise TypeError("data_array must be a numpy array.")
-    if not isinstance(xlabels, list):
-        raise TypeError("xlabels must be a list.")
-    if not isinstance(ylabels, list):
-        raise TypeError("ylabels must be a list.")
+    if not isinstance(xlabels, (list, np.ndarray)):
+        raise TypeError("xlabels must be a list or array")
+    if not isinstance(ylabels, (list, np.ndarray)):
+        raise TypeError("ylabels must be a list or array")
     if not isinstance(x_lab, str):
         raise TypeError("x_lab must be a string.")
     if not isinstance(y_lab, str):
