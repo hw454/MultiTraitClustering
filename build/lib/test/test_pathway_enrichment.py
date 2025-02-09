@@ -75,7 +75,7 @@ class TestPathwayEnrichment(unittest.TestCase):
             pd.DataFrame.from_dict({
                 'path_id': [random.choice(self.path_labs) for _ in range(self.n_pairs)],
                 'ClusterNumber': [random.choice(range(self.n_clust)) for _ in range(self.n_pairs)],
-                'combined_score': [random.random() for _ in range(self.n_pairs)]}
+                'CombinedScore': [random.random() for _ in range(self.n_pairs)]}
                 ) for meth in self.meth_labs
         }
         self.pathways_relation_df = pd.DataFrame(data= {
@@ -116,12 +116,12 @@ class TestPathwayEnrichment(unittest.TestCase):
         self.assertIn("score_row", result)
         self.assertIn("all_row", result)
         # Check that the or_row contains the term OddsRatio
-        self.assertTrue("OddsRatio" in result["or_row"].keys())
+        self.assertTrue("OddsRatio" in result["or_row"])
         # Check that the score_row contains the term CombinedScore
-        self.assertTrue("CombinedScore" in result["score_row"].keys())
+        self.assertTrue("CombinedScore" in result["score_row"])
         # Check the the all_row contains the term OddsRatio and CombinedScore
-        self.assertTrue("OddsRatio" in result["all_row"].keys())
-        self.assertTrue("CombinedScore" in result["all_row"].keys())
+        self.assertTrue("OddsRatio" in result["all_row"])
+        self.assertTrue("CombinedScore" in result["all_row"])
         # Negative checks
         self.assertRaises(TypeError, pe.get_pathway_rows_from_data, "not_a_list", c_num_lab)
         data_missing = [1, "pathway R-12345", 0.01, 2.5, 3.0 ]

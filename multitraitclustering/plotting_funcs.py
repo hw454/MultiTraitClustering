@@ -115,11 +115,11 @@ def chart_clusters_multi(
     if col_list is not None and not isinstance(col_list, list):
         raise TypeError("col_list must be a list")
     if not color_var in data.columns:
-        error_string = f"""The columns {color_var} is not in the data. 
+        error_string = f"""The columns {color_var} is not in the data.
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     if xcol is not None and not xcol in data.columns:
-        error_string = f"""The columns {xcol} is not in the data. 
+        error_string = f"""The columns {xcol} is not in the data.
             Available columns: {data.columns}"""
         raise KeyError(error_string)
     if col_list is not None and not all(col in data.columns for col in col_list):
@@ -349,14 +349,16 @@ def overlap_bars(df, xlab, ylab, group_lab, sep_lab, title):
 
         Args:
             df (pd.DataFrame): The input DataFrame containing the data to plot.
-            xlab (str): name of col in DataFrame for the x-axis, categorical data.
-            ylab (str): name of col in DataFrame for the y-axis, quantitative data.
-            group_lab (str): name of col in DataFrame for faceting the chart into groups, categorical data.
-            sep_lab (str): name of col in DataFrame to separate bars within groups (color), categorical data.
+            xlab (str): col in DataFrame for the x-axis, categorical data.
+            ylab (str): col in DataFrame for the y-axis, quantitative data.
+            group_lab (str): col in DataFrame for chart groups, categorical data.
+            sep_lab (str): col in DataFrame to separate bars within groups, categorical data.
             title (str): The title of the chart.
 
         Returns:
-            alt.Chart: An Altair chart object representing the overlapping bar chart.  The x-axis labels are hidden.  The column headers are rotated and aligned for better readability.
+            alt.Chart: An Altair chart object representing the overlapping bar chart.
+            The x-axis labels are hidden.
+            The column headers are rotated and aligned for better readability.
     """
     # Input checks
     if not isinstance(df, pd.DataFrame):
