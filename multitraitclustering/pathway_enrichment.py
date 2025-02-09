@@ -49,37 +49,37 @@ def _key_in_dict_check(k, p_dict):
     if k not in p_dict:
         raise KeyError(f"key '{k}' not found in p_dict")
 
-def _validate_dict_trio(path_clust_all_dict, path_clust_or_dict, path_clust_score_dict):
+def _validate_dict_trio(all_dict, or_dict, score_dict):
     """Validates the clust dictionaries of pathway dataframes"""
-    _type_dict_check(path_clust_or_dict)
-    _type_dict_check(path_clust_all_dict)
-    _type_dict_check(path_clust_score_dict)
-    for k in path_clust_all_dict.keys():
-        _path_id_check(path_clust_all_dict[k])
-        if "OddsRatio" not in path_clust_or_dict[k]:
+    _type_dict_check(or_dict)
+    _type_dict_check(all_dict)
+    _type_dict_check(score_dict)
+    for k in all_dict.keys():
+        _path_id_check(all_dict[k])
+        if "OddsRatio" not in or_dict[k]:
             error_string = f"""OddsRatio column is missing from `or_dict` for method {k}.
-                Available columns :{path_clust_or_dict[k]}"""
+                Available columns :{or_dict[k]}"""
             raise KeyError(error_string)
-        if "CombinedScore" not in path_clust_score_dict[k]:
+        if "CombinedScore" not in score_dict[k]:
             error_string = f"""CombinedScore column is missing from `score_dict` for method {k}.
-                Available columns :{path_clust_score_dict[k]}"""
+                Available columns :{score_dict[k]}"""
             raise KeyError(error_string)
-        if "OddsRatio" not in path_clust_all_dict[k]:
+        if "OddsRatio" not in all_dict[k]:
             error_string = f"""OddsRatio column is missing from `all_dict` for method {k}.
-                Available columns :{path_clust_all_dict[k]}"""
+                Available columns :{all_dict[k]}"""
             raise KeyError(error_string)
-        if "CombinedScore" not in path_clust_all_dict[k]:
+        if "CombinedScore" not in all_dict[k]:
             error_string = f"""CombinedScore column is missing from `all_dict` for method {k}.
-                Available columns :{path_clust_all_dict[k]}"""
+                Available columns :{all_dict[k]}"""
             raise KeyError(error_string)
-        if 'pval' not in path_clust_all_dict[k].columns:
+        if 'pval' not in all_dict[k].columns:
             error_string = f"""path_clust_all_dict must contain 'pval' column.
-                Available columns: {path_clust_all_dict[k].columns.tolist()}"""
+                Available columns: {all_dict[k].columns.tolist()}"""
             raise ValueError(error_string)
-    for k in path_clust_or_dict.keys():
-        _path_id_check(path_clust_or_dict[k])
-    for k in path_clust_score_dict.keys():
-        _path_id_check(path_clust_score_dict[k])
+    for k in or_dict.keys():
+        _path_id_check(or_dict[k])
+    for k in score_dict.keys():
+        _path_id_check(score_dict[k])
 
 def get_pathway_rows_from_data(data, c_num_lab):
     """
@@ -395,7 +395,7 @@ def full_pathway_enrichment(clust_dict, path_dir, gene_set_library = 'Reactome_2
         print(meth_key)
         all_name = path_dir+"/ClustPathEnrichment"+meth_key+".csv"
         score_name = path_dir+"/ClustPathCombinedScore"+meth_key+".csv"
-        or_name = path_dir+"/ClustPathsOR"+meth_key+".csv"
+        or_name = path_dir+"/ClustPathsOddsRatio"+meth_key+".csv"
         if os.path.exists(all_name) and os.path.exists(score_name) and os.path.exists(or_name):
             path_clust_all_dict[meth_key] = pd.read_csv(all_name, index_col = 0)
             path_clust_or_dict[meth_key] = pd.read_csv(or_name, index_col = 0)
@@ -436,17 +436,20 @@ def apply_p_filter(meth_key, all_dict, or_dict, score_dict, p_val_orig = 5E-8):
         rem_paths = []
         if n_paths > 0:
             p_val_new = p_val_orig / n_paths
+            # ALL
             rem_paths = path_all[path_all.pval <= p_val_new].path_id.tolist()
             path_all = path_all[~path_all.path_id.isin(rem_paths)]
-            path_score = path_score[~path_score.path_id.isin(rem_paths)]
-            path_or = path_or[~path_or.path_id.isin(rem_paths)]
             path_all.reset_index(drop=True, inplace=True)
+            # SCORE
+            path_score = path_score[~path_score.path_id.isin(rem_paths)]
             path_score.reset_index(drop=True, inplace=True)
+            # OR
+            path_or = path_or[~path_or.path_id.isin(rem_paths)]
             path_or.reset_index(drop=True, inplace=True)
         return path_all, path_or, path_score, rem_paths
 
     # Input validation
-    _validate_dict_trio(all_dict, or_dict, score_dict)
+    _validate_dict_trio(all_dict = all_dict, or_dict = or_dict, score_dict= score_dict)
     _key_in_dict_check(meth_key, all_dict)
     _key_in_dict_check(meth_key, or_dict)
     _key_in_dict_check(meth_key, score_dict)
@@ -465,9 +468,8 @@ def apply_p_filter(meth_key, all_dict, or_dict, score_dict, p_val_orig = 5E-8):
     all_dict[meth_key] = path_all
     or_dict[meth_key] = path_or
     score_dict[meth_key] = path_score
-
+    _validate_dict_trio(all_dict = all_dict, or_dict = or_dict, score_dict= score_dict)
     print("paths removed ", len(rm_pth))
-
     out_dict = {"all_dict": all_dict,
                 "or_dict": or_dict,
                 "score_dict": score_dict}
@@ -523,6 +525,5 @@ def remove_paths_children(path_dir, meth_key, path_dict, pathways_relation_df):
         # If the parent pathway is also in the results then remove the child.
         path_df.reset_index(drop = True, inplace=True)
         n_paths2 = path_df.shape[0]
-        path_df.to_csv(path_dir+"/ClustPathCombinedScore"+meth_key+".csv")
         print("paths removed ", n_paths - n_paths2)
     return path_dict
