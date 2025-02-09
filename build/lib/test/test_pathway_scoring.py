@@ -233,7 +233,7 @@ class TestPathwayScoring(unittest.TestCase):
         a2[4,4] = grey_val
 
         # Set the expected values
-        e0 = grey_val * (nsq-1)/nsq 
+        e0 = grey_val * (nsq-1)/nsq
         e1 = 0
         e2 = grey_val * n_grey / (nsq**2)
         e3 = 0
