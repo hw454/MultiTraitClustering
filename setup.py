@@ -36,7 +36,7 @@ labels."""
 
 setup(
     name="multitraitclustering",
-    version="0.1.36",
+    version="0.1.37",
     author="Hayley Wragg",
     author_email="hayleywragg@hotmail.com",
     description="Applies clustering to GWAS data to identify pathways",

@@ -395,7 +395,7 @@ def full_pathway_enrichment(clust_dict, path_dir, gene_set_library = 'Reactome_2
         print(meth_key)
         all_name = path_dir+"/ClustPathEnrichment"+meth_key+".csv"
         score_name = path_dir+"/ClustPathCombinedScore"+meth_key+".csv"
-        or_name = path_dir+"/ClustPathsOddsRatio"+meth_key+".csv"
+        or_name = path_dir+"/ClustPathOddsRatio"+meth_key+".csv"
         if os.path.exists(all_name) and os.path.exists(score_name) and os.path.exists(or_name):
             path_clust_all_dict[meth_key] = pd.read_csv(all_name, index_col = 0)
             path_clust_or_dict[meth_key] = pd.read_csv(or_name, index_col = 0)
