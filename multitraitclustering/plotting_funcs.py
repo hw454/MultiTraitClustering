@@ -65,6 +65,7 @@ def chart_clusters(
         error_string = f"""All items in tooltip must be a column in data.
             Available columns: {data.columns}"""
         raise KeyError(error_string)
+    data[color_var] = data[color_var].astype(str)
     chart = (
         alt.Chart(data, title=title)
         .mark_circle(size=60)
