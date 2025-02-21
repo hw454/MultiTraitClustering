@@ -279,6 +279,41 @@ class TestPathwayScoring(unittest.TestCase):
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
         self.assertRaises(KeyError, ps.clust_path_score,
                           df = df_no_clusts)
-
+    def test_overall_not_cropped_paths(self):
+        """
+        test_overall_not_cropped_paths get an overall pathway score for clusters
+        """
+        npoints = 300
+        nclusts = 6
+        pathways = [f"pathway_{i}" for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+            "ClusterNumber": cnums,
+            "CombinedScore": scores})
+        score = ps.overall_not_cropped_paths(df)
+        # Check output is float
+        self.assertTrue(isinstance(score, float))
+        # Check with score_lab
+        score = ps.overall_not_cropped_paths(df, score_lab="CombinedScore")
+        # Check output is float
+        self.assertTrue(isinstance(score, float))
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.overall_not_cropped_paths, df.to_numpy())
+        # KeyError if score_lab is not a valid label
+        self.assertRaises(KeyError, ps.overall_not_cropped_paths, df,
+                                              score_lab = "invalid_lab")
+        # KeyError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(KeyError, ps.overall_not_cropped_paths,
+            df = df_no_path
+        )
+        # KeyError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(KeyError, ps.overall_not_cropped_paths,
+            df = df_no_clusts
+        )
 if __name__ == '__main__':
     unittest.main()
