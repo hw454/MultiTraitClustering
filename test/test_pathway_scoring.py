@@ -134,6 +134,10 @@ class TestPathwayScoring(unittest.TestCase):
         score = ps.overall_not_cropped_paths(df, score_lab="CombinedScore")
         # Check output is float
         self.assertTrue(isinstance(score, float))
+        # Check that the value for OverallPathway from the clust_paths
+        # function is the same as calling the function directly
+        score_full_func = ps.clust_path_score(df)
+        self.assertTrue(score_full_func["OverallPathway"]==score)
         # ---------------------
         # NEGATIVE CHECKS
         # TypeError if df not dataframe
