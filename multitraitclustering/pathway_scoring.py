@@ -182,9 +182,12 @@ def assign_max_and_crop(mat, ignore_cols = None):
                 "out_mat": out_mat}
     return out_dict
 
-def overall_paths(df, score_lab = "CombinedScore"):
+def overall_cropped_paths(df, score_lab = "CombinedScore"):
     """
-    overall_paths Score for how well clusters identify pathways
+    WARNING: This function has now been replaced with overall_not_cropped_paths.
+    Will later be removed.
+
+    cropped_overall_paths score for how well clusters identify pathways
     
     Creates a score that describes how close the pathway cluster scores are
     clusters identifying unique pathways.
@@ -429,11 +432,9 @@ def clust_path_score(df, score_lab = "CombinedScore"):
         raise KeyError(error_string)
     path_contain_score = uniqueness(df, axis = 0, score_lab = score_lab)
     path_separate_score = uniqueness(df, axis = 1, score_lab = score_lab)
-    path_overall_score = overall_paths(df, score_lab = score_lab)
-    path_overall_notcropped_score = overall_not_cropped_paths(df, score_lab = score_lab)
+    path_overall_not_cropped_score = overall_not_cropped_paths(df, score_lab = score_lab)
     out_dict = {"PathContaining": path_contain_score,
                "PathSeparating": path_separate_score,
-               "OverallPathway": path_overall_score,
-               "OverallNotCropped": path_overall_notcropped_score
+               "OverallPathway": path_overall_not_cropped_score
     }
     return out_dict
