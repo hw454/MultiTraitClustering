@@ -181,68 +181,6 @@ def assign_max_and_crop(mat, ignore_cols = None):
                 "col_pairs": col_pairs,
                 "out_mat": out_mat}
     return out_dict
-
-def overall_cropped_paths(df, score_lab = "CombinedScore"):
-    """
-    WARNING: This function has now been replaced with overall_not_cropped_paths.
-    Will later be removed.
-
-    cropped_overall_paths score for how well clusters identify pathways
-    
-    Creates a score that describes how close the pathway cluster scores are
-    clusters identifying unique pathways.
-
-    Create the best_matches matrix using `path_best_matches`.
-
-    Create the ideal matrix this is all zeros except for ones on the pathway cluster pairs.
-    Only the pathways which appear in a best match somewhere are present in this matrix.
-
-    The score is the ssd between the cropped data and the ideal matrix
-
-    Args:
-        df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `CombinedScore`.
-        score_lab (str, optional): col label for score, defaults to "CombinedScore"
-    
-    Raise:
-        TypeError: df not a pandas dataframe
-        KeyError: pathway, ClusterNumber or score_lab not in df columns
-
-    Returns:
-        score (float)
-    """
-    # Verify Types
-    if not isinstance(df, pd.DataFrame):
-        error_string = f"""df should be a pandas dataframe not {type(df)}"""
-        raise TypeError(error_string)
-    # Verify Columns Labels
-    if "pathway" not in df.columns:
-        error_string = f"""col `pathway` should be in df. Available cols: {str(df.columns)}"""
-        raise KeyError(error_string)
-    if "ClusterNumber" not in df.columns:
-        error_string = f"""col `ClusterNumber` should be in df. Available cols: {str(df.columns)}"""
-        raise KeyError(error_string)
-    # Verify score_lab is a valid column
-    if score_lab not in df.columns:
-        error_string = f"""score_lab {score_lab} not col in df. Available cols: {str(df.columns)}"""
-        raise KeyError(error_string)
-    df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
-    mat = np.nan_to_num(df_wide.to_numpy())
-    # Compute the best match matrix and get the corresponding indexes
-    best_mat_out= path_best_matches(df, score_lab=score_lab)
-    crop_df = best_mat_out["best_df"].pivot_table(index='pathway',
-                                                  columns='ClusterNumber',
-                                                  values=score_lab)
-    crop_mat = np.nan_to_num(crop_df.to_numpy())
-    rows = best_mat_out["row_positions"]
-    cols = best_mat_out["col_pairs"]
-    # Compute the overall score using the best match matrix
-    ideal_mat = np.zeros(mat.shape)
-    for i,c in enumerate(cols):
-        ideal_mat[rows[i], c] = mat[rows[i], c]
-    i_mat = ideal_mat[sorted(rows), :]
-    score = redirect_score(ssd(crop_mat, i_mat))
-    return score
-
 def overall_not_cropped_paths(df, score_lab = "CombinedScore"):
     """
     overall_paths Score for how well clusters identify pathways
