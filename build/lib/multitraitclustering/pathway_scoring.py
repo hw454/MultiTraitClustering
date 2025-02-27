@@ -181,8 +181,7 @@ def assign_max_and_crop(mat, ignore_cols = None):
                 "col_pairs": col_pairs,
                 "out_mat": out_mat}
     return out_dict
-
-def overall_paths(df, score_lab = "CombinedScore"):
+def overall_not_cropped_paths(df, score_lab = "CombinedScore"):
     """
     overall_paths Score for how well clusters identify pathways
     
@@ -191,9 +190,10 @@ def overall_paths(df, score_lab = "CombinedScore"):
 
     Create the best_matches matrix using `path_best_matches`.
 
-    Create the ideal matrix this is all zeros except for ones on the pathway cluster pairs.
+    Create the ideal matrix this is all zeros except for ones on the pathway cluster pairs,
+    zeroes for all other pathway cluster combinations.
 
-    The score is the ssd between the cropped data and the ideal matrix
+    The score is the ssd between the pathway-cluster data and the ideal matrix
 
     Args:
         df (pd.DataFrame): columns are: `pathway`, `ClusterNumber` and `CombinedScore`.
@@ -225,19 +225,15 @@ def overall_paths(df, score_lab = "CombinedScore"):
     mat = np.nan_to_num(df_wide.to_numpy())
     # Compute the best match matrix and get the corresponding indexes
     best_mat_out= path_best_matches(df, score_lab=score_lab)
-    crop_df = best_mat_out["best_df"].pivot_table(index='pathway',
-                                                  columns='ClusterNumber',
-                                                  values=score_lab)
-    crop_mat = np.nan_to_num(crop_df.to_numpy())
     rows = best_mat_out["row_positions"]
     cols = best_mat_out["col_pairs"]
     # Compute the overall score using the best match matrix
     ideal_mat = np.zeros(mat.shape)
     for i,c in enumerate(cols):
         ideal_mat[rows[i], c] = mat[rows[i], c]
-    i_mat = ideal_mat[sorted(rows), :]
-    score = redirect_score(ssd(crop_mat, i_mat))
+    score = redirect_score(ssd(mat, ideal_mat))
     return score
+
 
 def redirect_score(score):
     """Score shift for making high values good
@@ -374,9 +370,9 @@ def clust_path_score(df, score_lab = "CombinedScore"):
         raise KeyError(error_string)
     path_contain_score = uniqueness(df, axis = 0, score_lab = score_lab)
     path_separate_score = uniqueness(df, axis = 1, score_lab = score_lab)
-    path_overall_score = overall_paths(df, score_lab = score_lab)
+    path_overall_not_cropped_score = overall_not_cropped_paths(df, score_lab = score_lab)
     out_dict = {"PathContaining": path_contain_score,
                "PathSeparating": path_separate_score,
-               "OverallPathway": path_overall_score
+               "OverallPathway": path_overall_not_cropped_score
     }
     return out_dict

@@ -115,40 +115,6 @@ class TestPathwayScoring(unittest.TestCase):
         # -------------------------------
         # NEGATIVE CHECKS
         self.assertRaises(TypeError, ps.assign_max_and_crop, mat = 4)
-    def test_overall_paths(self):
-        """
-        test_overall_paths get an overall pathway score for clusters
-        """
-        npoints = 300
-        nclusts = 6
-        pathways = [f"pathway_{i}" for i in range(npoints)]
-        cnums = [random.randint(1, nclusts) for i in range(npoints)]
-        scores = [random.random() for i in range(npoints)]
-        df = pd.DataFrame(data = {"pathway": pathways,
-                                  "ClusterNumber": cnums,
-                                  "CombinedScore": scores})
-        score = ps.overall_paths(df)
-        # Check output is float
-        self.assertTrue(isinstance(score, float))
-        # Check with score_lab
-        score = ps.overall_paths(df, score_lab="CombinedScore")
-        # Check output is float
-        self.assertTrue(isinstance(score, float))
-        # ---------------------
-        # NEGATIVE CHECKS
-        # TypeError if df not dataframe
-        self.assertRaises(TypeError, ps.overall_paths, df.to_numpy())
-        # KeyError if score_lab is not a valid label
-        self.assertRaises(KeyError, ps.overall_paths, df,
-                          score_lab = "invalid_lab")
-        # KeyError when `pathway` is not a column
-        df_no_path = df.rename(columns={'pathway':'paths'})
-        self.assertRaises(KeyError, ps.overall_paths,
-                          df = df_no_path)
-        # KeyError when `ClusterNumber` is not a column
-        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
-        self.assertRaises(KeyError, ps.overall_paths,
-                          df = df_no_clusts)
     def test_redirect_score(self):
         """
         test_redirect_score Makes low values high and vise versa.
@@ -209,46 +175,93 @@ class TestPathwayScoring(unittest.TestCase):
         the pathway scores for given clusters. It checks the accuracy and correctness
         of the scoring mechanism by comparing the output with expected results.
         Raises:
-            AssertionError: If clust_path_Score fails the tests
+            AssertionError: If clust_path_score fails the tests
         """
-        # Known value checks
-        # * Identity matrix should score 0. (A4)
-        # * Permuted identity should also score 0. (A1)
-        # * Identity + Grey squares should score
-        #   no. grey values * number of grey squares/ nsqs**2 (A2)
-        # * Constant matrix should score maximum. (A0)
-        nsq=6
+                # Known Value tests
+        # Square matrices - nc columns and rows
+        # * A0 -identity - Scores 0, then 100 after redirect
+        # * A1 -permuted identity - Scores 0, then 100 after redirect
+        # * A2 -A1 with two extra smaller values - Scores 2*value/nc**2
+        # * A3 - A1 with two extra larger values - Scores 2*smaller value/ nc**2
+        # * A4 - Constant matrix - Scores value*(nc-1)/nc
+        # Rectangular matrix - npa rows, nc columns
+        # * A5 - zeroes with identity inside - Scores 0, then 100 after redirect
+        # * A6 - permuted A5 - Scores 0
+        # * A7 - A6 with 5 smaller extra values - Score 5*value/(nc*np)
+        # * A8 constant - Scores value*(np-1)/np
+        nc = 6
+        npa = 50
         grey_val = 0.5
-        n_grey = 2
-        # Create the test data
-        a0 = grey_val * np.ones((nsq,nsq))
-        a4 = np.eye(nsq)
+        grey_two_val = 0.5* grey_val
+        n_grey = 3
+        # Create the test data - Square matrix
+        a4 = grey_val * np.ones((nc,nc))
+        a0 = grey_val * np.eye(nc)
         a1 = a4.copy()
-        a1[:,0:3] = a4[:,1:4]
-        a1[:,3] = a4[:,0]
-        a1[:,4] = a4[:,5]
-        a1[:,5] = a4[:,4]
+        a1[:,0:3] = a0[:, 1:4]
+        a1[:,3] = a0[:, 0]
+        a1[:,4] = a0[:, 5]
+        a1[:,5] = a0[:, 4]
         a2 = a1.copy()
-        a2[5,3] = grey_val
-        a2[4,4] = grey_val
-
+        a2[5,3] = grey_two_val
+        a2[4,4] = grey_two_val
+        a2[0,5] = grey_two_val
+        a3 = a1.copy()
+        a3[5,3] = 0.25 + grey_val
+        a3[4,4] = 0.25 + grey_val
+        a3[0,5] = 0.25 + grey_val
         # Set the expected values
-        e0 = grey_val * (nsq-1)/nsq
+        e0 = 0
         e1 = 0
-        e2 = grey_val * n_grey / (nsq**2)
-        e3 = 0
+        e2 = grey_two_val * n_grey / (nc**2)
+        e3 = grey_val * n_grey / (nc**2)
+        e4 = grey_val * (nc-1) / nc
         col_lab_dict = {i:f"c{i}" for i in range(a0.shape[1])}
         row_lab_dict = {i:f"p{i}" for i in range(a0.shape[0])}
         # Create a long form data_frame from matrix
-        expec = [e0, e1, e2, e3]
+        expec = [e0, e1, e2, e3, e4]
         re_expec = [ps.redirect_score(e) for e in expec]
-        for i, a_mat in enumerate([a0, a1, a2, a4]):
+        for i, a_mat in enumerate([a0, a1, a2, a3, a4]):#
             a_df = dp.long_df_from_p_cnum_arr(a_mat,
                                     row_lab_dict=row_lab_dict,
                                     col_lab_dict=col_lab_dict,
                                     score_lab="CombinedScore")
-            p_scores = ps.clust_path_score(a_df, score_lab="CombinedScore")
-            self.assertTrue(p_scores["OverallPathway"]==re_expec[i])
+            sc = ps.clust_path_score(a_df)
+            self.assertTrue(sc["OverallPathway"]==re_expec[i])
+        # Create the test data - Rectangular matrix
+        a8 = grey_val * np.ones((npa,nc))
+        a5 = np.zeros((npa,nc))
+        a5[0:nc,:] = grey_val * np.eye(nc)
+        #print(a5)
+        a6 = a5.copy()
+        a6[:,0:3] = a5[:,1:4]
+        a6[:,3] = a5[:,0]
+        a6[:,4] = a5[:,5]
+        a6[:,5] = a5[:,4]
+        a7 = a6.copy()
+        a7[5,3] = grey_two_val
+        a7[4,4] = grey_two_val
+        a7[0,5] = grey_two_val
+        a7[20,4] = grey_two_val
+        a7[35,5] = grey_two_val
+        n_grey = 5
+        # Set the expected values
+        e5 = 0
+        e6 = 0
+        e7 = grey_two_val * n_grey / (nc*npa)
+        e8 = grey_val * (npa-1) / npa
+        col_lab_dict = {i:f"c{i}" for i in range(a5.shape[1])}
+        row_lab_dict = {i:f"p{i}" for i in range(a5.shape[0])}
+        # Create a long form data_frame from matrix
+        expec = [ e5, e6, e7, e8]
+        re_expec = [ps.redirect_score(e) for e in expec]
+        for i, a_mat in enumerate([a5, a6, a7, a8]):
+            a_df = dp.long_df_from_p_cnum_arr(a_mat,
+                                    row_lab_dict=row_lab_dict,
+                                    col_lab_dict=col_lab_dict,
+                                    score_lab="CombinedScore")
+            sc = ps.clust_path_score(a_df)
+            self.assertTrue(sc["OverallPathway"]==re_expec[i])
         npoints = 300
         nclusts = 6
         pathways = [f"pathway_{i}" for i in range(npoints)]
@@ -278,6 +291,129 @@ class TestPathwayScoring(unittest.TestCase):
         # KeyError when `ClusterNumber` is not a column
         df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
         self.assertRaises(KeyError, ps.clust_path_score,
+                          df = df_no_clusts)
+    def test_overall_not_cropped_paths(self):
+        """
+        test_overall_paths get an overall pathway score for clusters
+        """
+        # Known Value tests
+        # Square matrices - nc columns and rows
+        # * A0 -identity - Scores 0, then 100 after redirect
+        # * A1 -permuted identity - Scores 0, then 100 after redirect
+        # * A2 -A1 with two extra smaller values - Scores 2*value/nc**2
+        # * A3 - A1 with two extra larger values - Scores 2*smaller value/ nc**2
+        # * A4 - Constant matrix - Scores value*(nc-1)/nc
+        # Rectangular matrix - npa rows, nc columns
+        # * A5 - zeroes with identity inside - Scores 0, then 100 after redirect
+        # * A6 - permuted A5 - Scores 0
+        # * A7 - A6 with 5 smaller extra values - Score 5*value/(nc*np)
+        # * A8 constant - Scores value*(np-1)/np
+        nc = 6
+        npa = 50
+        grey_val = 0.5
+        grey_two_val = 0.5* grey_val
+        n_grey = 3
+        # Create the test data - Square matrix
+        a4 = grey_val * np.ones((nc,nc))
+        a0 = grey_val * np.eye(nc)
+        a1 = a4.copy()
+        a1[:,0:3] = a0[:, 1:4]
+        a1[:,3] = a0[:, 0]
+        a1[:,4] = a0[:, 5]
+        a1[:,5] = a0[:, 4]
+        a2 = a1.copy()
+        a2[5,3] = grey_two_val
+        a2[4,4] = grey_two_val
+        a2[0,5] = grey_two_val
+        a3 = a1.copy()
+        a3[5,3] = 0.25 + grey_val
+        a3[4,4] = 0.25 + grey_val
+        a3[0,5] = 0.25 + grey_val
+        # Set the expected values
+        e0 = 0
+        e1 = 0
+        e2 = grey_two_val * n_grey / (nc**2)
+        e3 = grey_val * n_grey / (nc**2)
+        e4 = grey_val * (nc-1) / nc
+        col_lab_dict = {i:f"c{i}" for i in range(a0.shape[1])}
+        row_lab_dict = {i:f"p{i}" for i in range(a0.shape[0])}
+        # Create a long form data_frame from matrix
+        expec = [e0, e1, e2, e3, e4]
+        re_expec = [ps.redirect_score(e) for e in expec]
+        for i, a_mat in enumerate([a0, a1, a2, a3, a4]):#
+            a_df = dp.long_df_from_p_cnum_arr(a_mat,
+                                    row_lab_dict=row_lab_dict,
+                                    col_lab_dict=col_lab_dict,
+                                    score_lab="CombinedScore")
+            sc = ps.overall_not_cropped_paths(a_df)
+            self.assertTrue(sc==re_expec[i])
+        # Create the test data - Rectangular matrix
+        a8 = grey_val * np.ones((npa,nc))
+        a5 = np.zeros((npa,nc))
+        a5[0:nc,:] = grey_val * np.eye(nc)
+        #print(a5)
+        a6 = a5.copy()
+        a6[:,0:3] = a5[:,1:4]
+        a6[:,3] = a5[:,0]
+        a6[:,4] = a5[:,5]
+        a6[:,5] = a5[:,4]
+        a7 = a6.copy()
+        a7[5,3] = grey_two_val
+        a7[4,4] = grey_two_val
+        a7[0,5] = grey_two_val
+        a7[20,4] = grey_two_val
+        a7[35,5] = grey_two_val
+        n_grey = 5
+        # Set the expected values
+        e5 = 0
+        e6 = 0
+        e7 = grey_two_val * n_grey / (nc*npa)
+        e8 = grey_val * (npa-1) / npa
+        col_lab_dict = {i:f"c{i}" for i in range(a5.shape[1])}
+        row_lab_dict = {i:f"p{i}" for i in range(a5.shape[0])}
+        # Create a long form data_frame from matrix
+        expec = [ e5, e6, e7, e8]
+        re_expec = [ps.redirect_score(e) for e in expec]
+        for i, a_mat in enumerate([a5, a6, a7, a8]):
+            a_df = dp.long_df_from_p_cnum_arr(a_mat,
+                                    row_lab_dict=row_lab_dict,
+                                    col_lab_dict=col_lab_dict,
+                                    score_lab="CombinedScore")
+            sc = ps.overall_not_cropped_paths(a_df)
+            self.assertTrue(sc==re_expec[i])
+        npoints = 300
+        nclusts = 6
+        pathways = [f"pathway_{i}" for i in range(npoints)]
+        cnums = [random.randint(1, nclusts) for i in range(npoints)]
+        scores = [random.random() for i in range(npoints)]
+        df = pd.DataFrame(data = {"pathway": pathways,
+                                  "ClusterNumber": cnums,
+                                  "CombinedScore": scores})
+        score = ps.overall_not_cropped_paths(df)
+        # Check output is float
+        self.assertTrue(isinstance(score, float))
+        # Check with score_lab
+        score = ps.overall_not_cropped_paths(df, score_lab="CombinedScore")
+        # Check output is float
+        self.assertTrue(isinstance(score, float))
+        # Check that the value for OverallPathway from the clust_paths
+        # function is the same as calling the function directly
+        score_full_func = ps.clust_path_score(df)
+        self.assertTrue(score_full_func["OverallPathway"]==score)
+        # ---------------------
+        # NEGATIVE CHECKS
+        # TypeError if df not dataframe
+        self.assertRaises(TypeError, ps.overall_not_cropped_paths, df.to_numpy())
+        # KeyError if score_lab is not a valid label
+        self.assertRaises(KeyError, ps.overall_not_cropped_paths, df,
+                          score_lab = "invalid_lab")
+        # KeyError when `pathway` is not a column
+        df_no_path = df.rename(columns={'pathway':'paths'})
+        self.assertRaises(KeyError, ps.overall_not_cropped_paths,
+                          df = df_no_path)
+        # KeyError when `ClusterNumber` is not a column
+        df_no_clusts = df.rename(columns={'ClusterNumber':'clusts'})
+        self.assertRaises(KeyError, ps.overall_not_cropped_paths,
                           df = df_no_clusts)
 
 if __name__ == '__main__':
