@@ -95,14 +95,14 @@ def uniqueness(df, axis = 0, score_lab = "combined_score"):
         raise KeyError(error_str)
     df_wide = df.pivot_table(index='pathway', columns='ClusterNumber', values=score_lab)
     if df_wide.shape[1]==1 and axis ==1:
-        return "NaN"
+        return 0
     mat = np.nan_to_num(df_wide.to_numpy())
     if axis == 1:
         mat = mat.T
     # Shift values to start at zero
     mat_norm = mat - mat.min(0)
     i=0
-    # Normalise the range of values
+    # Normalise each column
     for m in mat.ptp(1):
         if m != 0:
             mat_norm[i] = mat_norm[i]/m
